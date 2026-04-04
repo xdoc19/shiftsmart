@@ -3,8 +3,7 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>ShiftSmart v2 — AI Capacity Planner</title>
-<link href="https://fonts.googleapis.com/css2?family=IBM+Plex+Mono:wght@400;500&family=IBM+Plex+Sans:wght@300;400;500;600&display=swap" rel="stylesheet">
+<title>ShiftSmart v2</title>
 <style>
 *{box-sizing:border-box;margin:0;padding:0}
 :root{
@@ -16,333 +15,268 @@
   --amber:#F5A623;--amber-d:#7A4C00;--amber-bg:#281800;
   --red:#FF5B5B;--red-d:#7A1A1A;--red-bg:#230A0A;
   --purple:#9B7FFF;--teal:#2DD4BF;
-  --shift-h:8;
 }
-html,body{height:100%;background:var(--bg);color:var(--text);font-family:'IBM Plex Sans',sans-serif;font-size:14px;overflow:hidden}
-#app{display:grid;grid-template-columns:230px 1fr;grid-template-rows:52px 1fr;height:100vh}
-
-#header{grid-column:1/-1;background:var(--bg2);border-bottom:1px solid var(--border);display:flex;align-items:center;padding:0 20px;gap:16px}
-.logo{font-family:'IBM Plex Mono',monospace;font-size:16px;font-weight:500;color:var(--blue);letter-spacing:-0.5px}
-.logo span{color:var(--text2);font-weight:400}
-.header-kpis{display:flex;gap:16px;margin-left:auto}
+html,body{height:100%;background:var(--bg);color:var(--text);font-family:system-ui,sans-serif;font-size:13px;overflow:hidden}
+#app{display:grid;grid-template-columns:220px 1fr;grid-template-rows:50px 1fr;height:100vh}
+#hdr{grid-column:1/-1;background:var(--bg2);border-bottom:1px solid var(--border);display:flex;align-items:center;padding:0 16px;gap:12px}
+.logo{font-size:15px;font-weight:700;color:var(--blue);letter-spacing:-0.5px;font-family:monospace}
+.hkpis{display:flex;gap:14px;margin-left:auto}
 .hkpi{text-align:right}
-.hkpi-v{font-size:18px;font-weight:600;font-family:'IBM Plex Mono',monospace;line-height:1}
-.hkpi-l{font-size:10px;color:var(--text2);margin-top:1px}
-.hkpi-v.ok{color:var(--green)}.hkpi-v.warn{color:var(--amber)}.hkpi-v.bad{color:var(--red)}
-.run-btn{background:var(--blue);color:#fff;border:none;border-radius:8px;padding:8px 18px;font-size:13px;font-weight:600;cursor:pointer;font-family:inherit;transition:all .15s;white-space:nowrap}
-.run-btn:hover{background:#6AB2FF}
-.run-btn:disabled{opacity:.5;cursor:default}
-
-#sidebar{background:var(--bg2);border-right:1px solid var(--border);overflow-y:auto;padding:8px 0;display:flex;flex-direction:column}
-.nav-section{font-size:10px;font-weight:600;color:var(--text3);text-transform:uppercase;letter-spacing:.8px;padding:12px 16px 4px}
-.nav-item{display:flex;align-items:center;gap:8px;padding:8px 16px;cursor:pointer;font-size:13px;color:var(--text2);transition:all .1s;border-left:2px solid transparent}
-.nav-item:hover{color:var(--text);background:var(--bg3)}
-.nav-item.active{color:var(--blue);background:var(--blue-bg);border-left-color:var(--blue)}
-.nav-badge{margin-left:auto;font-size:10px;font-weight:600;padding:1px 6px;border-radius:10px}
-.nb-red{background:var(--red-bg);color:var(--red)}.nb-amber{background:var(--amber-bg);color:var(--amber)}.nb-green{background:var(--green-bg);color:var(--green)}
-.sidebar-foot{margin-top:auto;padding:12px;border-top:1px solid var(--border)}
-.sidebar-foot div{font-size:11px;color:var(--text3);margin-bottom:2px}
-
-#main{overflow-y:auto;padding:20px;background:var(--bg)}
-.view{display:none}.view.active{display:block}
-
-.kpi-grid{display:grid;grid-template-columns:repeat(4,1fr);gap:10px;margin-bottom:14px}
-.kpi{background:var(--bg2);border:1px solid var(--border);border-radius:10px;padding:14px}
-.kpi-l{font-size:10px;color:var(--text2);margin-bottom:4px}
-.kpi-v{font-size:24px;font-weight:600;font-family:'IBM Plex Mono',monospace;line-height:1}
-.kpi-s{font-size:10px;color:var(--text3);margin-top:3px}
-.kpi-v.ok{color:var(--green)}.kpi-v.warn{color:var(--amber)}.kpi-v.bad{color:var(--red)}.kpi-v.blue{color:var(--blue)}
-
-.card{background:var(--bg2);border:1px solid var(--border);border-radius:12px;padding:16px;margin-bottom:14px}
-.card-title{font-size:10px;font-weight:600;color:var(--text3);text-transform:uppercase;letter-spacing:.6px;margin-bottom:12px}
-
-.tbl-wrap{overflow-x:auto;border-radius:8px;border:1px solid var(--border)}
-table{width:100%;border-collapse:collapse;font-size:12px}
-th{padding:8px 12px;text-align:left;font-size:10px;font-weight:600;color:var(--text3);text-transform:uppercase;letter-spacing:.4px;border-bottom:1px solid var(--border);background:var(--bg3);white-space:nowrap}
-td{padding:7px 12px;border-bottom:1px solid var(--border);color:var(--text);vertical-align:middle}
+.hv{font-size:17px;font-weight:700;font-family:monospace;line-height:1}
+.hl{font-size:10px;color:var(--text2);margin-top:1px}
+.hv.ok{color:var(--green)}.hv.warn{color:var(--amber)}.hv.bad{color:var(--red)}
+.rbtn{background:var(--blue);color:#fff;border:none;border-radius:7px;padding:7px 16px;font-size:12px;font-weight:700;cursor:pointer}
+.rbtn:hover{opacity:.85}.rbtn:disabled{opacity:.4;cursor:default}
+#sb{background:var(--bg2);border-right:1px solid var(--border);overflow-y:auto;padding:6px 0;display:flex;flex-direction:column}
+.ns{font-size:9px;font-weight:700;color:var(--text3);text-transform:uppercase;letter-spacing:.8px;padding:10px 14px 3px}
+.ni{display:flex;align-items:center;gap:6px;padding:7px 14px;cursor:pointer;font-size:12px;color:var(--text2);border-left:2px solid transparent;transition:all .1s}
+.ni:hover{color:var(--text);background:var(--bg3)}
+.ni.on{color:var(--blue);background:var(--blue-bg);border-left-color:var(--blue);font-weight:600}
+.nb{margin-left:auto;font-size:10px;font-weight:700;padding:1px 5px;border-radius:8px}
+.nb-r{background:var(--red-bg);color:var(--red)}.nb-a{background:var(--amber-bg);color:var(--amber)}
+.sbfoot{margin-top:auto;padding:10px;border-top:1px solid var(--border);font-size:10px;color:var(--text3);line-height:1.8}
+#main{overflow-y:auto;padding:16px}
+.view{display:none}.view.on{display:block}
+.card{background:var(--bg2);border:1px solid var(--border);border-radius:10px;padding:14px;margin-bottom:12px}
+.ct{font-size:9px;font-weight:700;color:var(--text3);text-transform:uppercase;letter-spacing:.5px;margin-bottom:10px}
+.kgrid{display:grid;grid-template-columns:repeat(4,1fr);gap:8px;margin-bottom:12px}
+.kc{background:var(--bg2);border:1px solid var(--border);border-radius:8px;padding:12px}
+.kl{font-size:10px;color:var(--text2);margin-bottom:3px}
+.kv{font-size:22px;font-weight:700;font-family:monospace;line-height:1}
+.ks{font-size:10px;color:var(--text3);margin-top:3px}
+.kv.ok{color:var(--green)}.kv.warn{color:var(--amber)}.kv.bad{color:var(--red)}
+.tw{overflow-x:auto;border:1px solid var(--border);border-radius:8px}
+table{width:100%;border-collapse:collapse;font-size:11px}
+th{padding:7px 10px;text-align:left;font-size:9px;font-weight:700;color:var(--text3);text-transform:uppercase;letter-spacing:.4px;border-bottom:1px solid var(--border);background:var(--bg3);white-space:nowrap}
+td{padding:6px 10px;border-bottom:1px solid var(--border);vertical-align:middle}
 tr:last-child td{border-bottom:none}
 tr:hover td{background:var(--bg3)}
-.mono{font-family:'IBM Plex Mono',monospace;font-size:11px}
-
-.badge{display:inline-block;font-size:10px;font-weight:600;padding:2px 7px;border-radius:10px;white-space:nowrap}
-.b-day{background:var(--green-bg);color:var(--green)}
-.b-night{background:var(--red-bg);color:var(--red)}
-.b-s1{background:#0D1F3C;color:#4A9EFF}
-.b-s2{background:#1A1A00;color:#F5A623}
-.b-s3{background:#1A0A1A;color:#9B7FFF}
-.b-ok{background:var(--green-bg);color:var(--green)}
-.b-warn{background:var(--amber-bg);color:var(--amber)}
-.b-over{background:var(--red-bg);color:var(--red)}
-.b-moved{background:#1A1A4A;color:var(--purple)}
-.b-sat{background:#1A2A1A;color:#2DD4BF}
-
-.cap-bar-wrap{margin-bottom:8px}
-.cap-bar-header{display:flex;justify-content:space-between;font-size:11px;margin-bottom:3px}
-.cap-bar-name{font-weight:500;color:var(--text);font-size:12px}
-.cap-track{height:22px;background:var(--bg4);border-radius:4px;overflow:hidden;position:relative;border:1px solid var(--border)}
-
-.filters{display:flex;gap:8px;margin-bottom:12px;flex-wrap:wrap;align-items:center}
-.fchip{padding:4px 12px;border:1px solid var(--border2);border-radius:20px;font-size:11px;cursor:pointer;color:var(--text2);transition:all .1s;user-select:none}
+.mn{font-family:monospace;font-size:11px}
+.bdg{display:inline-block;font-size:9px;font-weight:700;padding:2px 6px;border-radius:8px}
+.bs1{background:#0D1F3C;color:#4A9EFF}.bs2{background:#281800;color:#F5A623}.bs3{background:#230A0A;color:#FF5B5B}
+.bok{background:var(--green-bg);color:var(--green)}.bwn{background:var(--amber-bg);color:var(--amber)}.ber{background:var(--red-bg);color:var(--red)}
+.bsat{background:#0A2A20;color:var(--teal)}.bmv{background:#1A1A4A;color:var(--purple)}
+.fi,.fs{width:100%;padding:6px 8px;background:var(--bg3);border:1px solid var(--border);border-radius:6px;color:var(--text);font-size:11px;font-family:inherit;outline:none}
+.fi:focus,.fs:focus{border-color:var(--blue)}
+.fi-n{width:60px;padding:3px 6px;background:var(--bg3);border:1px solid var(--border);border-radius:5px;color:var(--text);font-size:11px;font-family:monospace;text-align:right;outline:none}
+.fi-n:focus{border-color:var(--blue)}
+.fg{margin-bottom:10px}
+.fl{font-size:10px;color:var(--text2);margin-bottom:3px;display:block}
+.btn-add{background:var(--blue-bg);border:1px solid var(--blue-d);color:var(--blue);border-radius:6px;padding:5px 12px;cursor:pointer;font-size:11px}
+.btn-save{background:var(--green-bg);border:1px solid var(--green-d);color:var(--green);border-radius:6px;padding:5px 12px;cursor:pointer;font-size:11px}
+.btn-del{background:var(--red-bg);border:1px solid var(--red-d);color:var(--red);border-radius:5px;padding:2px 7px;cursor:pointer;font-size:10px}
+.wnav{display:flex;align-items:center;gap:8px;margin-bottom:12px}
+.wnav button{background:var(--bg3);border:1px solid var(--border);border-radius:5px;color:var(--text2);padding:4px 10px;cursor:pointer;font-size:12px}
+.wnav button:hover{border-color:var(--blue);color:var(--blue)}
+.wnav span{font-family:monospace;font-size:13px;font-weight:700;color:var(--text);min-width:60px;text-align:center}
+.frow{display:flex;gap:8px;margin-bottom:10px;flex-wrap:wrap;align-items:center}
+.fchip{padding:3px 10px;border:1px solid var(--border2);border-radius:16px;font-size:10px;cursor:pointer;color:var(--text2)}
 .fchip:hover{border-color:var(--blue);color:var(--blue)}
 .fchip.on{background:var(--blue-bg);border-color:var(--blue);color:var(--blue)}
-
-.week-nav{display:flex;align-items:center;gap:10px;margin-bottom:14px}
-.week-nav button{background:var(--bg3);border:1px solid var(--border);border-radius:6px;color:var(--text2);padding:5px 12px;cursor:pointer;font-size:12px;font-family:inherit}
-.week-nav button:hover{border-color:var(--blue);color:var(--blue)}
-.week-nav span{font-family:'IBM Plex Mono',monospace;font-size:14px;font-weight:500;color:var(--text);min-width:80px;text-align:center}
-
-.hm-cell{display:inline-block;width:26px;height:16px;border-radius:2px;font-size:9px;font-weight:600;line-height:16px;text-align:center;cursor:pointer;transition:transform .1s}
-.hm-cell:hover{transform:scale(1.3)}
-.hm-0{background:#1A1E2E;color:var(--text3)}
-.hm-1{background:#0A2018;color:#2DD4BF}
-.hm-2{background:#0D2A10;color:var(--green)}
-.hm-3{background:#1A3A10;color:#5DE89A}
-.hm-4{background:#2A4A10;color:#7AF0A0}
-.hm-5{background:var(--amber-bg);color:var(--amber)}
-.hm-6{background:#3A1500;color:#FF9940}
-.hm-7{background:var(--red-bg);color:var(--red)}
-.hm-x{background:#111;color:#333;cursor:default}
-
-.fg{margin-bottom:12px}
-.fl{font-size:11px;color:var(--text2);margin-bottom:4px;display:block}
-.fi,.fs{width:100%;padding:7px 10px;background:var(--bg3);border:1px solid var(--border);border-radius:7px;color:var(--text);font-size:12px;font-family:inherit;outline:none}
-.fi:focus,.fs:focus{border-color:var(--blue)}
-.fi-sm{width:70px;padding:4px 7px;background:var(--bg3);border:1px solid var(--border);border-radius:6px;color:var(--text);font-size:11px;font-family:'IBM Plex Mono',monospace;text-align:right;outline:none}
-.fi-sm:focus{border-color:var(--blue)}
-.save-btn{background:var(--green-bg);border:1px solid var(--green-d);color:var(--green);border-radius:7px;padding:7px 16px;cursor:pointer;font-size:12px;font-family:inherit}
-.save-btn:hover{background:var(--green-d)}
-.add-btn{background:var(--blue-bg);border:1px solid var(--blue-d);color:var(--blue);border-radius:7px;padding:7px 16px;cursor:pointer;font-size:12px;font-family:inherit}
-.add-btn:hover{background:var(--blue-d)}
-.del-btn{background:var(--red-bg);border:1px solid var(--red-d);color:var(--red);border-radius:6px;padding:3px 8px;cursor:pointer;font-size:11px;font-family:inherit}
-.del-btn:hover{opacity:.8}
-
-.shift-legend{display:flex;gap:12px;font-size:11px;color:var(--text2);margin-bottom:12px;flex-wrap:wrap}
-.opt-step{display:flex;align-items:center;gap:10px;padding:8px 12px;background:var(--bg2);border:1px solid var(--border);border-radius:8px;margin-bottom:6px;font-size:12px;color:var(--text2);transition:all .3s}
-.opt-step.done{border-color:var(--green-d);color:var(--green);background:var(--green-bg)}
-.opt-step.active{border-color:var(--blue);color:var(--blue);background:var(--blue-bg)}
-.opt-dot{width:8px;height:8px;border-radius:50%;background:currentColor;flex-shrink:0}
-
-#opt-progress{display:none;margin-bottom:14px}
-
-::-webkit-scrollbar{width:6px;height:6px}
+.bar-tr{height:20px;background:var(--bg4);border-radius:4px;overflow:hidden;position:relative;border:1px solid var(--border);margin-bottom:6px}
+.hm{width:24px;height:15px;border-radius:2px;display:inline-block;font-size:8px;line-height:15px;text-align:center;font-weight:700;cursor:pointer}
+.hm0{background:#1A1E2E;color:var(--text3)}
+.hm1{background:#0A2018;color:var(--teal)}
+.hm2{background:#0D2A10;color:var(--green)}
+.hm3{background:#1A3A10;color:#5DE89A}
+.hm4{background:#2A4A10;color:#7AF0A0}
+.hm5{background:var(--amber-bg);color:var(--amber)}
+.hm6{background:#3A1500;color:#FF9940}
+.hm7{background:var(--red-bg);color:var(--red)}
+.hmx{background:#111;color:#333;cursor:default}
+.grid2{display:grid;grid-template-columns:1fr 1fr;gap:12px}
+::-webkit-scrollbar{width:5px;height:5px}
 ::-webkit-scrollbar-track{background:var(--bg2)}
 ::-webkit-scrollbar-thumb{background:var(--border2);border-radius:3px}
-
-.grid2{display:grid;grid-template-columns:1fr 1fr;gap:12px}
-.section-actions{display:flex;gap:8px;margin-bottom:12px;flex-wrap:wrap;align-items:center}
-.tag{display:inline-block;font-size:9px;font-weight:600;padding:1px 5px;border-radius:4px;margin-left:4px;vertical-align:middle}
-.tag-sat{background:#0A2A2A;color:var(--teal)}
-.tag-no{background:var(--red-bg);color:var(--red)}
 </style>
 </head>
 <body>
 <div id="app">
 
-<div id="header">
-  <div class="logo">Shift<span>Smart</span> <span style="font-size:11px;opacity:.5">v2</span></div>
-  <div style="font-size:11px;color:var(--text3);padding-left:8px;border-left:1px solid var(--border)">AI Capacity Planner · Sch1 07-15 · Sch2 15-23 · Sch3 23-07</div>
-  <div class="header-kpis">
-    <div class="hkpi"><div class="hkpi-v bad" id="h-night">—</div><div class="hkpi-l">Sch3 noapte</div></div>
-    <div class="hkpi"><div class="hkpi-v warn" id="h-util">—</div><div class="hkpi-l">Util. medie</div></div>
-    <div class="hkpi"><div class="hkpi-v bad" id="h-over">—</div><div class="hkpi-l">Supraîncărcate</div></div>
-    <div class="hkpi"><div class="hkpi-v ok" id="h-ops">—</div><div class="hkpi-l">Operator coverage</div></div>
+<div id="hdr">
+  <div class="logo">ShiftSmart <span style="color:var(--text3);font-size:10px;font-family:sans-serif">v2</span></div>
+  <div style="font-size:10px;color:var(--text3);border-left:1px solid var(--border);padding-left:10px">Sch1 07-15 · Sch2 15-23 · Sch3 23-07 · L-J max3sch · V max2sch · Sâm opțional · Dum indisponibil</div>
+  <div class="hkpis">
+    <div class="hkpi"><div class="hv bad" id="h-n">—</div><div class="hl">Sch3 noapte</div></div>
+    <div class="hkpi"><div class="hv warn" id="h-u">—</div><div class="hl">Util. medie</div></div>
+    <div class="hkpi"><div class="hv bad" id="h-o">—</div><div class="hl">Supraîncărcate</div></div>
+    <div class="hkpi"><div class="hv ok" id="h-op">—</div><div class="hl">Ops gaps</div></div>
   </div>
-  <button class="run-btn" id="run-btn" onclick="runOptimizer()">&#9654; AI Optimizer</button>
+  <button class="rbtn" id="rbtn" onclick="runOpt()">▶ AI Optimizer</button>
 </div>
 
-<div id="sidebar">
-  <div class="nav-section">Planning</div>
-  <div class="nav-item active" onclick="nav('dashboard',this)">&#9632; Dashboard</div>
-  <div class="nav-item" onclick="nav('capacity',this)">&#9644; Capacitate linii <span class="nav-badge nb-amber" id="nb-over">0</span></div>
-  <div class="nav-item" onclick="nav('heatmap',this)">&#9638; Heatmap 56 săpt.</div>
-  <div class="nav-item" onclick="nav('orders',this)">&#9654; Alocări <span class="nav-badge nb-red" id="nb-night">0</span></div>
-  <div class="nav-section">Configurare</div>
-  <div class="nav-item" onclick="nav('lines',this)">&#9643; Linii producție</div>
-  <div class="nav-item" onclick="nav('items',this)">&#9632; Items & Run Rate</div>
-  <div class="nav-item" onclick="nav('operators',this)">&#128100; Operatori</div>
-  <div class="nav-item" onclick="nav('demand',this)">&#8659; Demand client</div>
-  <div class="nav-item" onclick="nav('settings',this)">&#9881; Setări</div>
-  <div class="sidebar-foot">
+<div id="sb">
+  <div class="ns">Planning</div>
+  <div class="ni on" onclick="nav('dash',this)">▪ Dashboard</div>
+  <div class="ni" onclick="nav('cap',this)">▬ Capacitate <span class="nb nb-a" id="nb-o">0</span></div>
+  <div class="ni" onclick="nav('hmap',this)">▦ Heatmap 56 săpt.</div>
+  <div class="ni" onclick="nav('ord',this)">▶ Alocări <span class="nb nb-r" id="nb-n">0</span></div>
+  <div class="ns">Configurare</div>
+  <div class="ni" onclick="nav('lines',this)">▣ Linii producție</div>
+  <div class="ni" onclick="nav('items',this)">▪ Items & Run Rate</div>
+  <div class="ni" onclick="nav('ops',this)">● Operatori</div>
+  <div class="ni" onclick="nav('dem',this)">↓ Demand client</div>
+  <div class="ni" onclick="nav('cfg',this)">⚙ Setări</div>
+  <div class="sbfoot">
     <div>Sch1: 07:00–15:00 (8h)</div>
     <div>Sch2: 15:00–23:00 (8h)</div>
     <div>Sch3: 23:00–07:00 (8h)</div>
-    <div style="margin-top:6px">Luni–Joi: max 3 sch.</div>
-    <div>Vineri: max 2 sch.</div>
-    <div>Sâmbătă: opțional</div>
+    <div style="margin-top:4px">L–J: max 3 schimburi</div>
+    <div>Vineri: max 2 schimburi</div>
+    <div>Sâmbătă: opțional/linie</div>
     <div style="color:var(--red)">Duminică: indisponibil</div>
   </div>
 </div>
 
 <div id="main">
-  <div id="opt-progress">
-    <div class="opt-step" id="os1"><div class="opt-dot"></div>Citesc demand și run rates per linie...</div>
-    <div class="opt-step" id="os2"><div class="opt-dot"></div>Calculez ore necesare (qty / run_rate per linie)...</div>
-    <div class="opt-step" id="os3"><div class="opt-dot"></div>Verific disponibilitate operatori per săptămână...</div>
-    <div class="opt-step" id="os4"><div class="opt-dot"></div>Aloc pe schimburi Sch1→Sch2→Sch3 (evit Sch3)...</div>
-    <div class="opt-step" id="os5"><div class="opt-dot"></div>Redistribui în săptămâni adiacente dacă e supraîncărcare...</div>
-    <div class="opt-step" id="os6"><div class="opt-dot"></div>Verifică acoperire operatori și deadline-uri...</div>
-  </div>
 
   <!-- DASHBOARD -->
-  <div class="view active" id="view-dashboard">
-    <div class="kpi-grid">
-      <div class="kpi"><div class="kpi-l">Schimburi 3 (noapte)</div><div class="kpi-v bad" id="kpi-night">—</div><div class="kpi-s">de eliminat prin optimizer</div></div>
-      <div class="kpi"><div class="kpi-l">Utilizare medie</div><div class="kpi-v warn" id="kpi-util">—</div><div class="kpi-s">target 70–90%</div></div>
-      <div class="kpi"><div class="kpi-l">Linii supraîncărcate</div><div class="kpi-v bad" id="kpi-over">—</div><div class="kpi-s">peste capacitate maximă</div></div>
-      <div class="kpi"><div class="kpi-l">Săpt. cu lipsă operatori</div><div class="kpi-v bad" id="kpi-ops">—</div><div class="kpi-s">operatori insuficienți</div></div>
+  <div class="view on" id="view-dash">
+    <div class="kgrid">
+      <div class="kc"><div class="kl">Schimburi Sch3 noapte</div><div class="kv bad" id="kpi-n">—</div><div class="ks">de eliminat</div></div>
+      <div class="kc"><div class="kl">Utilizare medie</div><div class="kv warn" id="kpi-u">—</div><div class="ks">target 70–90%</div></div>
+      <div class="kc"><div class="kl">Linii supraîncărcate</div><div class="kv bad" id="kpi-o">—</div><div class="ks">peste capacitate</div></div>
+      <div class="kc"><div class="kl">Săpt. lipsă operatori</div><div class="kv bad" id="kpi-op">—</div><div class="ks">din 56</div></div>
     </div>
-    <div class="shift-legend">
-      <span style="color:var(--blue)">&#9632; Schimb 1 (07-15)</span>
-      <span style="color:var(--amber)">&#9632; Schimb 2 (15-23)</span>
-      <span style="color:var(--red)">&#9632; Schimb 3 (23-07) — de evitat</span>
-      <span style="color:var(--teal)">&#9632; Sâmbătă (opțional)</span>
+    <div style="font-size:10px;color:var(--text2);margin-bottom:10px;display:flex;gap:12px;flex-wrap:wrap">
+      <span style="color:var(--blue)">▪ Sch1 07-15</span>
+      <span style="color:var(--amber)">▪ Sch2 15-23</span>
+      <span style="color:var(--red)">▪ Sch3 23-07 (evitat)</span>
+      <span style="color:var(--teal)">▪ Sâmbătă opțional</span>
     </div>
     <div class="card">
-      <div class="card-title">Încărcare linii — săptămâna</div>
-      <div class="week-nav">
-        <button onclick="changeWeek(-1)">&#8249;</button>
-        <span id="week-label">W01</span>
-        <button onclick="changeWeek(1)">&#8250;</button>
-        <span style="font-size:10px;color:var(--text3)" id="week-day-info"></span>
+      <div class="ct">Încărcare linii</div>
+      <div class="wnav">
+        <button onclick="chW(-1)">‹</button>
+        <span id="wl1">W01</span>
+        <button onclick="chW(1)">›</button>
+        <span style="font-size:10px;color:var(--text3)" id="winfo"></span>
       </div>
-      <div id="lines-chart"></div>
+      <div id="lchrt"></div>
     </div>
-    <div class="card"><div class="card-title">Probleme detectate</div><div id="issues-list"></div></div>
+    <div class="card"><div class="ct">Probleme detectate</div><div id="issues"></div></div>
   </div>
 
   <!-- CAPACITY -->
-  <div class="view" id="view-capacity">
-    <div class="filters">
-      <div class="fchip on" onclick="toggleF(this,'all','cap')">Toate</div>
-      <div class="fchip" onclick="toggleF(this,'over','cap')">Supraîncărcate</div>
-      <div class="fchip" onclick="toggleF(this,'night','cap')">Cu Sch3</div>
-      <div class="fchip" onclick="toggleF(this,'under','cap')">Sub 50%</div>
+  <div class="view" id="view-cap">
+    <div class="frow">
+      <div class="fchip on" onclick="setF(this,'all')">Toate</div>
+      <div class="fchip" onclick="setF(this,'over')">Supraîncărcate</div>
+      <div class="fchip" onclick="setF(this,'sch3')">Cu Sch3</div>
+      <div class="fchip" onclick="setF(this,'under')">Sub 50%</div>
     </div>
-    <div class="week-nav">
-      <button onclick="changeWeek(-1)">&#8249;</button>
-      <span id="week-label2">W01</span>
-      <button onclick="changeWeek(1)">&#8250;</button>
-    </div>
-    <div id="cap-detail"></div>
+    <div class="wnav"><button onclick="chW(-1)">‹</button><span id="wl2">W01</span><button onclick="chW(1)">›</button></div>
+    <div id="cap-det"></div>
   </div>
 
   <!-- HEATMAP -->
-  <div class="view" id="view-heatmap">
-    <div style="font-size:11px;color:var(--text2);margin-bottom:10px;display:flex;gap:12px;flex-wrap:wrap;align-items:center">
-      <span>Încărcare %:</span>
-      <span><span class="hm-cell hm-0">0</span> liber</span>
-      <span><span class="hm-cell hm-3">65</span> normal</span>
-      <span><span class="hm-cell hm-5">90</span> alert</span>
-      <span><span class="hm-cell hm-7">!</span> supraîncărcat</span>
-      <span><span class="hm-cell hm-x">—</span> duminică</span>
+  <div class="view" id="view-hmap">
+    <div style="font-size:10px;color:var(--text2);margin-bottom:8px;display:flex;gap:10px;flex-wrap:wrap">
+      <span>Încărcare:</span>
+      <span><span class="hm hm0">0</span> liber</span>
+      <span><span class="hm hm3">65</span> normal</span>
+      <span><span class="hm hm5">90</span> alert</span>
+      <span><span class="hm hm7">!</span> depășit</span>
+      <span><span class="hm hmx">–</span> N/A</span>
     </div>
-    <div style="overflow:auto;max-height:650px;border:1px solid var(--border);border-radius:8px">
-      <table class="heatmap" id="heatmap-table" style="border-collapse:collapse;white-space:nowrap;font-size:11px"></table>
+    <div style="overflow:auto;max-height:640px;border:1px solid var(--border);border-radius:8px">
+      <table id="hmt" style="border-collapse:collapse;white-space:nowrap"></table>
     </div>
   </div>
 
   <!-- ORDERS -->
-  <div class="view" id="view-orders">
-    <div class="filters" id="orders-filters">
-      <div class="fchip on" onclick="filterOrders('all',this)">Toate</div>
-      <div class="fchip" onclick="filterOrders('night',this)">Sch3 noapte</div>
-      <div class="fchip" onclick="filterOrders('over',this)">Supraîncărcare</div>
-      <div class="fchip" onclick="filterOrders('moved',this)">Mutate AI</div>
-      <div class="fchip" onclick="filterOrders('sat',this)">Sâmbătă</div>
+  <div class="view" id="view-ord">
+    <div class="frow" id="ord-f">
+      <div class="fchip on" onclick="setOF(this,'all')">Toate</div>
+      <div class="fchip" onclick="setOF(this,'sch3')">Sch3</div>
+      <div class="fchip" onclick="setOF(this,'over')">Supraîncărcat</div>
+      <div class="fchip" onclick="setOF(this,'moved')">Mutate AI</div>
     </div>
-    <div class="tbl-wrap">
+    <div class="tw">
       <table><thead><tr>
-        <th>Item</th><th>Linie</th><th>Săpt.</th><th>Buc.</th><th>Run Rate</th><th>Ore nec.</th><th>Schimburi</th><th>Shift</th><th>Util%</th><th>Ops nec.</th><th>Status</th>
-      </tr></thead><tbody id="orders-tbody"></tbody></table>
+        <th>Item</th><th>Linie</th><th>Săpt.</th><th>Buc.</th><th>Run rate</th>
+        <th>Ore</th><th>Sch.</th><th>Shift</th><th>Util%</th><th>Ops nec.</th><th>Status</th>
+      </tr></thead><tbody id="ord-body"></tbody></table>
     </div>
   </div>
 
-  <!-- LINES CONFIG -->
+  <!-- LINES -->
   <div class="view" id="view-lines">
-    <div class="section-actions">
-      <button class="add-btn" onclick="addLine()">+ Adaugă linie nouă</button>
-      <button class="save-btn" onclick="saveLines()">&#10003; Salvează & Recalculează</button>
-      <span style="font-size:11px;color:var(--text2)">Click pe nume pentru a edita</span>
+    <div class="frow" style="margin-bottom:10px">
+      <button class="btn-add" onclick="addLine()">+ Linie nouă</button>
+      <button class="btn-save" onclick="saveAndRun()">✓ Salvează & Recalculează</button>
+      <span style="font-size:10px;color:var(--text2)">RW01–RW20 + linii noi adăugate</span>
     </div>
-    <div class="tbl-wrap">
+    <div class="tw">
       <table>
         <thead><tr>
-          <th>Cod linie</th><th>Nume afișat</th><th>Cap. ore/zi (Sch1+2)</th><th>Max schimburi/zi</th>
-          <th>Ops. necesari/schimb</th><th>Sâmbătă</th><th>Acțiune</th>
+          <th>Cod</th><th>Nume linie</th><th>Cap ore/săpt.</th>
+          <th>Max sch/zi (L-J)</th><th>Ops/schimb</th><th>Sâmbătă</th><th>Activ</th><th>Șterge</th>
         </tr></thead>
-        <tbody id="lines-tbody"></tbody>
+        <tbody id="lines-body"></tbody>
       </table>
     </div>
   </div>
 
   <!-- ITEMS & RUN RATES -->
   <div class="view" id="view-items">
-    <div class="section-actions">
-      <button class="add-btn" onclick="addItem()">+ Adaugă item</button>
-      <button class="save-btn" onclick="saveItems()">&#10003; Salvează</button>
-      <span style="font-size:11px;color:var(--text2)">Run rate (buc/oră) poate fi diferit per linie</span>
+    <div class="frow" style="margin-bottom:10px">
+      <button class="btn-add" onclick="addItem()">+ Item nou</button>
+      <button class="btn-save" onclick="saveAndRun()">✓ Salvează & Recalculează</button>
+      <span style="font-size:10px;color:var(--text2)">Run rate (buc/oră) per item per linie. 0 = incompatibil</span>
     </div>
-    <div class="tbl-wrap" style="overflow-x:auto">
-      <table id="items-table">
-        <thead id="items-thead"></thead>
-        <tbody id="items-tbody"></tbody>
-      </table>
+    <div style="overflow:auto;max-height:600px;border:1px solid var(--border);border-radius:8px">
+      <table id="items-tbl" style="border-collapse:collapse;white-space:nowrap"></table>
     </div>
   </div>
 
   <!-- OPERATORS -->
-  <div class="view" id="view-operators">
-    <div class="section-actions">
-      <button class="save-btn" onclick="saveOperators()">&#10003; Salvează disponibilitate</button>
-      <span style="font-size:11px;color:var(--text2)">Operatori disponibili per săptămână (toate liniile combinate)</span>
+  <div class="view" id="view-ops">
+    <div class="frow" style="margin-bottom:10px">
+      <button class="btn-save" onclick="saveAndRun()">✓ Salvează & Recalculează</button>
     </div>
-    <div class="grid2" style="margin-bottom:14px">
+    <div class="grid2">
       <div class="card">
-        <div class="card-title">Operatori necesari per linie (fix)</div>
-        <div id="ops-per-line"></div>
+        <div class="ct">Operatori necesari per linie / schimb</div>
+        <div id="ops-line"></div>
       </div>
       <div class="card">
-        <div class="card-title">Disponibilitate operatori per săptămână</div>
-        <div style="overflow-y:auto;max-height:400px" id="ops-per-week"></div>
+        <div class="ct">Disponibilitate operatori per săptămână</div>
+        <div style="overflow-y:auto;max-height:380px" id="ops-week"></div>
       </div>
     </div>
-    <div class="card">
-      <div class="card-title">Acoperire operatori — gap analysis</div>
-      <div id="ops-gap"></div>
-    </div>
+    <div class="card"><div class="ct">Gap analysis operatori</div><div id="ops-gap"></div></div>
   </div>
 
   <!-- DEMAND -->
-  <div class="view" id="view-demand">
-    <div class="section-actions">
-      <button class="save-btn" onclick="saveDemand()">&#10003; Salvează & Recalculează</button>
-      <button style="background:var(--bg3);border:1px solid var(--border);color:var(--text2);border-radius:7px;padding:7px 12px;cursor:pointer;font-size:12px;font-family:inherit" onclick="randomizeDemand()">&#9812; Demo aleatoriu</button>
-      <span style="font-size:11px;color:var(--text2)">Afișate primele 20 săpt. din 56</span>
+  <div class="view" id="view-dem">
+    <div class="frow" style="margin-bottom:10px">
+      <button class="btn-save" onclick="saveDemand()">✓ Salvează & Recalculează</button>
+      <button style="background:var(--bg3);border:1px solid var(--border);color:var(--text2);border-radius:6px;padding:5px 12px;cursor:pointer;font-size:11px" onclick="randomDem()">⚄ Demo aleatoriu</button>
+      <span style="font-size:10px;color:var(--text2)">Afișate primele 20 săptămâni din 56</span>
     </div>
-    <div style="overflow:auto;max-height:500px;border:1px solid var(--border);border-radius:8px">
-      <table id="demand-table" style="border-collapse:collapse;font-size:11px;white-space:nowrap"></table>
+    <div style="overflow:auto;max-height:560px;border:1px solid var(--border);border-radius:8px">
+      <table id="dem-tbl" style="border-collapse:collapse;white-space:nowrap"></table>
     </div>
   </div>
 
   <!-- SETTINGS -->
-  <div class="view" id="view-settings">
+  <div class="view" id="view-cfg">
     <div class="grid2">
       <div class="card">
-        <div class="card-title">Schimburi & program</div>
-        <div class="fg"><label class="fl">Ore schimb 1 (07:00–15:00)</label><input class="fi" id="s-h1" value="8" type="number" step="0.5"></div>
-        <div class="fg"><label class="fl">Ore schimb 2 (15:00–23:00)</label><input class="fi" id="s-h2" value="8" type="number" step="0.5"></div>
-        <div class="fg"><label class="fl">Ore schimb 3 (23:00–07:00)</label><input class="fi" id="s-h3" value="8" type="number" step="0.5"></div>
-        <div class="fg"><label class="fl">Zile Luni–Joi (max schimburi)</label><input class="fi" id="s-mth" value="3" type="number"></div>
-        <div class="fg"><label class="fl">Vineri (max schimburi)</label><input class="fi" id="s-fri" value="2" type="number"></div>
-        <div class="fg"><label class="fl">Fereastră mutare optimizer (±săpt.)</label><input class="fi" id="s-window" value="2" type="number"></div>
-        <button class="save-btn" onclick="saveSettings()">Salvează</button>
+        <div class="ct">Parametri schimburi</div>
+        <div class="fg"><label class="fl">Ore Sch1 (07-15)</label><input class="fi" id="c1" type="number" value="8" step="0.5"></div>
+        <div class="fg"><label class="fl">Ore Sch2 (15-23)</label><input class="fi" id="c2" type="number" value="8" step="0.5"></div>
+        <div class="fg"><label class="fl">Ore Sch3 (23-07)</label><input class="fi" id="c3" type="number" value="8" step="0.5"></div>
+        <div class="fg"><label class="fl">Max schimburi Luni–Joi</label><input class="fi" id="c4" type="number" value="3"></div>
+        <div class="fg"><label class="fl">Max schimburi Vineri</label><input class="fi" id="c5" type="number" value="2"></div>
+        <div class="fg"><label class="fl">Fereastră mutare optimizer (±săpt.)</label><input class="fi" id="c6" type="number" value="2"></div>
+        <button class="btn-save" onclick="saveCfg()">Salvează parametri</button>
       </div>
       <div class="card">
-        <div class="card-title">Capacitate ore/săptămână per linie (calculată automat)</div>
-        <div style="font-size:12px;color:var(--text2);margin-bottom:10px">
-          Formula: (Luni-Joi × max_sch × 8h) + (Vineri × 2 × 8h) + (Sâmbătă dacă activă × 2 × 8h)
-        </div>
-        <div id="cap-formula-display"></div>
+        <div class="ct">Capacitate calculată automat (ore/săpt.)</div>
+        <div style="font-size:11px;color:var(--text2);margin-bottom:8px">Formula: (4 zile × max_sch × 8h) + (Vineri × 2 × 8h) + (Sâmbătă × 2 × 8h dacă activă)</div>
+        <div id="cap-calc"></div>
       </div>
     </div>
   </div>
@@ -351,581 +285,575 @@ tr:hover td{background:var(--bg3)}
 </div>
 
 <script>
-// ==================== DATA ====================
+// ===== CONSTANTS =====
 const WEEKS = 56;
-const SHIFT_H = 8;
-
-// Days availability per week (Mon-Thu=4days max3shifts, Fri=1day max2shifts, Sat=optional, Sun=0)
-// Max hours per week per line = 4*3*8 + 1*2*8 + sat*2*8 = 96+16+16sat
-function calcLineCapH(satEnabled) {
-  return 4*3*SHIFT_H + 1*2*SHIFT_H + (satEnabled ? 1*2*SHIFT_H : 0);
-}
-
-let settings = { h1:8, h2:8, h3:8, mth:3, fri:2, window:2 };
-
-// 20 lines RW01-RW20
-let lines = Array.from({length:20}, (_,i) => ({
-  id: i,
-  code: `RW${String(i+1).padStart(2,'0')}`,
-  name: `RW${String(i+1).padStart(2,'0')} — Linie ${i+1}`,
-  satEnabled: i < 10,
-  maxShiftsDay: 3,
-  opsPerShift: 2 + (i % 3),
-  active: true
-}));
-
-// 100 items - 10 families × 10
+const SH = 8; // ore per schimb
 const FAM = ['TEN','BRK','CLT','BLT','SPR','GER','PUL','CAM','CHP','VLV'];
-let items = Array.from({length:100}, (_,i) => {
-  const fam = FAM[Math.floor(i/10)];
-  const num = String(i%10+1).padStart(2,'0');
-  // Run rates per line — different per line
-  const baseRate = 20 + Math.floor(Math.random()*80);
-  const runRates = {};
-  lines.forEach(l => {
-    // Items 0-19 can run on 3 lines, others on 1
-    if(i < 20) {
-      const compatible = [i%20, (i+1)%20, (i+2)%20];
-      runRates[l.id] = compatible.includes(l.id) ? Math.round(baseRate * (0.8 + Math.random()*0.4)) : 0;
-    } else {
-      runRates[l.id] = (i%20 === l.id) ? baseRate : 0;
-    }
+
+// ===== DATA =====
+var cfg = {s1:8,s2:8,s3:8,mth:3,fri:2,win:2};
+
+var lines = [];
+for(var i=0;i<20;i++){
+  lines.push({
+    id:i,
+    code:'RW'+String(i+1).padStart(2,'0'),
+    name:'Linie '+String(i+1).padStart(2,'0'),
+    sat: i<10,
+    maxSch:3,
+    ops:2+(i%3),
+    active:true
   });
-  // Ensure at least one line has a rate
-  if(Object.values(runRates).every(v=>v===0)) runRates[i%20] = baseRate;
-  return { id:i, code:`${fam}-${num}`, desc:`${fam} type ${num}`, runRates };
-});
-
-// Demand [item][week] in pieces
-let demand = Array.from({length:100}, (_,i) =>
-  Array.from({length:WEEKS}, (_,w) => {
-    if(Math.random() < 0.25) return 0;
-    const base = 100 + Math.floor(Math.random()*800);
-    const spike = w%8===0 ? Math.floor(Math.random()*400) : 0;
-    return base + spike;
-  })
-);
-
-// Operators available per week (global pool)
-let opsAvailable = Array.from({length:WEEKS}, (_,w) => 20 + Math.floor(Math.random()*10));
-
-// ==================== STATE ====================
-let schedule = null;
-let currentWeek = 0;
-let capFilter = 'all';
-let ordersFilter = 'all';
-let optimized = false;
-
-// ==================== SCHEDULE LOGIC ====================
-function getLineCapH(lineIdx) {
-  const l = lines[lineIdx];
-  if(!l || !l.active) return 0;
-  return 4*3*SHIFT_H + 1*2*SHIFT_H + (l.satEnabled ? 1*2*SHIFT_H : 0);
 }
 
-function getShiftLabel(hoursUsed) {
-  const dayOnly = 4*1*SHIFT_H + 1*1*SHIFT_H; // 1 shift Mon-Fri = 40h
-  const twoShift = 4*2*SHIFT_H + 1*2*SHIFT_H; // 2 shifts Mon-Fri = 80h
-  if(hoursUsed <= dayOnly) return 'Sch1';
-  if(hoursUsed <= twoShift) return 'Sch2';
+var items = [];
+for(var i=0;i<100;i++){
+  var fam = FAM[Math.floor(i/10)];
+  var num = String(i%10+1).padStart(2,'0');
+  var rr = {};
+  for(var li=0;li<lines.length;li++){
+    var base = 20+Math.floor(Math.random()*80);
+    if(i<20){ // compatible cu 3 linii
+      var compat = [i%20,(i+1)%20,(i+2)%20];
+      rr[li] = compat.indexOf(li)>=0 ? Math.round(base*(0.8+Math.random()*0.4)) : 0;
+    } else {
+      rr[li] = (i%20===li) ? base : 0;
+    }
+  }
+  // ensure at least one line
+  var hasAny = false;
+  for(var k in rr){ if(rr[k]>0){hasAny=true;break;} }
+  if(!hasAny) rr[i%20] = 40;
+  items.push({id:i,code:fam+'-'+num,desc:fam+' type '+num,rr:rr});
+}
+
+var demand = [];
+for(var i=0;i<100;i++){
+  var row = [];
+  for(var w=0;w<WEEKS;w++){
+    if(Math.random()<0.25){row.push(0);}
+    else{row.push(100+Math.floor(Math.random()*700)+(w%8===0?Math.floor(Math.random()*300):0));}
+  }
+  demand.push(row);
+}
+
+var opsAvail = [];
+for(var w=0;w<WEEKS;w++) opsAvail.push(20+Math.floor(Math.random()*10));
+
+// ===== STATE =====
+var sch = null;
+var curW = 0;
+var capF = 'all';
+var ordF = 'all';
+
+// ===== CAPACITY CALC =====
+function getLineCap(li){
+  var l = lines[li];
+  if(!l||!l.active) return 0;
+  return 4*l.maxSch*SH + 1*cfg.fri*SH + (l.sat?1*2*SH:0);
+}
+
+function getLineCapDay(li){
+  // single shift capacity Mon-Fri only
+  return (4*1+1*1)*SH;
+}
+
+function getLineCapTwoShift(li){
+  return (4*2+1*cfg.fri)*SH;
+}
+
+function shiftLabel(used,li){
+  if(used<=getLineCapDay(li)) return 'Sch1';
+  if(used<=getLineCapTwoShift(li)) return 'Sch2';
   return 'Sch3';
 }
 
-function buildSchedule() {
-  const lineLoad = Array.from({length:lines.length}, () => new Array(WEEKS).fill(0));
-  const allocs = [];
-
-  for(let i=0; i<items.length; i++) {
-    for(let w=0; w<WEEKS; w++) {
-      const qty = demand[i][w];
+// ===== SCHEDULE =====
+function buildBase(){
+  var ll = [];
+  for(var i=0;i<lines.length;i++) ll.push(new Array(WEEKS).fill(0));
+  var al = [];
+  for(var i=0;i<items.length;i++){
+    for(var w=0;w<WEEKS;w++){
+      var qty = demand[i][w];
       if(!qty) continue;
-      // Find default line (first with non-zero run rate)
-      let bestLine = -1, bestRate = 0;
-      lines.forEach((l,li) => {
-        if(l.active && items[i].runRates[li] > bestRate) {
-          bestRate = items[i].runRates[li];
-          bestLine = li;
+      // find best line (highest run rate)
+      var best=-1,bRate=0;
+      for(var li=0;li<lines.length;li++){
+        if(lines[li].active && items[i].rr[li]>bRate){
+          bRate=items[i].rr[li]; best=li;
         }
-      });
-      if(bestLine < 0) continue;
-      const hrs = qty / items[bestLine].runRates[bestLine];
-      lineLoad[bestLine][w] += hrs;
-      allocs.push({itemIdx:i, week:w, lineIdx:bestLine, qty, runRate:items[i].runRates[bestLine], hours:hrs, shift:'Sch1', moved:false, overload:false, useSat:false});
+      }
+      if(best<0) continue;
+      var hrs = qty/bRate;
+      ll[best][w]+=hrs;
+      al.push({ii:i,w:w,li:best,qty:qty,rr:bRate,hrs:hrs,shift:'Sch1',moved:false,over:false});
     }
   }
-  // Annotate shifts
-  allocs.forEach(a => {
-    const used = lineLoad[a.lineIdx][a.week];
-    const cap = getLineCapH(a.lineIdx);
-    a.shift = getShiftLabel(used);
-    a.overload = used > cap;
-    a.useSat = used > 4*2*SHIFT_H + 1*2*SHIFT_H;
+  al.forEach(function(a){
+    a.shift=shiftLabel(ll[a.li][a.w],a.li);
+    a.over=ll[a.li][a.w]>getLineCap(a.li);
   });
-  return {lineLoad, allocs};
+  return {ll:ll,al:al};
 }
 
-function runOptimizerLogic() {
-  const base = buildSchedule();
-  const lineLoad = base.lineLoad.map(l => [...l]);
-  const allocs = base.allocs.map(a => ({...a}));
-  const win = settings.window;
-  const twoShiftH = 4*2*SHIFT_H + 1*2*SHIFT_H; // threshold before Sch3
+function runOptimizerLogic(){
+  var base = buildBase();
+  var ll = base.ll.map(function(r){return r.slice();});
+  var al = base.al.map(function(a){return Object.assign({},a);});
+  var win = cfg.win;
 
-  // Step 1: move to compatible lines if overloaded
-  for(let a of allocs) {
-    if(lineLoad[a.lineIdx][a.week] <= twoShiftH) continue;
-    const item = items[a.itemIdx];
-    const altLines = lines.map((_,li)=>li).filter(li =>
-      li !== a.lineIdx && lines[li].active && item.runRates[li] > 0
-    );
-    for(let alt of altLines) {
-      const altHrs = a.qty / item.runRates[alt];
-      if(lineLoad[alt][a.week] + altHrs <= twoShiftH) {
-        lineLoad[a.lineIdx][a.week] -= a.hours;
-        a.runRate = item.runRates[alt];
-        a.hours = altHrs;
-        lineLoad[alt][a.week] += altHrs;
-        a.lineIdx = alt;
-        a.moved = true;
+  // Step 1: move to alt compatible lines
+  for(var i=0;i<al.length;i++){
+    var a=al[i];
+    if(ll[a.li][a.w]<=getLineCapTwoShift(a.li)) continue;
+    var item=items[a.ii];
+    for(var li2=0;li2<lines.length;li2++){
+      if(li2===a.li||!lines[li2].active||!item.rr[li2]) continue;
+      var hrs2=a.qty/item.rr[li2];
+      if(ll[li2][a.w]+hrs2<=getLineCapTwoShift(li2)){
+        ll[a.li][a.w]-=a.hrs;
+        a.rr=item.rr[li2]; a.hrs=hrs2; a.li=li2; a.moved=true;
+        ll[li2][a.w]+=hrs2;
         break;
       }
     }
   }
 
   // Step 2: move to adjacent weeks
-  for(let a of allocs) {
-    if(lineLoad[a.lineIdx][a.week] <= twoShiftH) { a.shift = getShiftLabel(lineLoad[a.lineIdx][a.week]); continue; }
-    for(let dw=1; dw<=win; dw++) {
-      for(let sign of [-1,1]) {
-        const nw = a.week + sign*dw;
+  for(var i=0;i<al.length;i++){
+    var a=al[i];
+    if(ll[a.li][a.w]<=getLineCapTwoShift(a.li)){
+      a.shift=shiftLabel(ll[a.li][a.w],a.li); continue;
+    }
+    var moved=false;
+    for(var dw=1;dw<=win&&!moved;dw++){
+      var signs=[-1,1];
+      for(var s=0;s<2&&!moved;s++){
+        var nw=a.w+signs[s]*dw;
         if(nw<0||nw>=WEEKS) continue;
-        if(lineLoad[a.lineIdx][nw] + a.hours <= twoShiftH) {
-          lineLoad[a.lineIdx][a.week] -= a.hours;
-          lineLoad[a.lineIdx][nw] += a.hours;
-          a.week = nw;
-          a.moved = true;
-          break;
+        if(ll[a.li][nw]+a.hrs<=getLineCapTwoShift(a.li)){
+          ll[a.li][a.w]-=a.hrs;
+          ll[a.li][nw]+=a.hrs;
+          a.w=nw; a.moved=true; moved=true;
         }
       }
-      if(lineLoad[a.lineIdx][a.week] <= twoShiftH) break;
     }
-    a.shift = getShiftLabel(lineLoad[a.lineIdx][a.week]);
-    a.overload = lineLoad[a.lineIdx][a.week] > getLineCapH(a.lineIdx);
-    a.useSat = lineLoad[a.lineIdx][a.week] > twoShiftH && !a.overload;
+    a.shift=shiftLabel(ll[a.li][a.w],a.li);
+    a.over=ll[a.li][a.w]>getLineCap(a.li);
   }
 
-  schedule = {lineLoad, allocs};
+  sch={ll:ll,al:al};
   updateKPIs();
-  renderDashboard();
-  renderCapacity();
-  renderHeatmap();
-  renderOrders();
+  renderDash();
+  renderCap();
+  renderHmap();
+  renderOrd();
   renderOpsGap();
 }
 
-function updateKPIs() {
-  if(!schedule) return;
-  const {lineLoad, allocs} = schedule;
-  const twoShiftH = 4*2*SHIFT_H + 1*2*SHIFT_H;
-
-  const nightCount = allocs.filter(a=>a.shift==='Sch3').length;
-  const overLines = new Set();
-  lines.forEach((_,li) => {
-    for(let w=0;w<WEEKS;w++) if(lineLoad[li][w]>getLineCapH(li)) overLines.add(li);
-  });
-  let totalUtil=0, cnt=0;
-  lines.forEach((_,li) => {
-    for(let w=0;w<WEEKS;w++) {
-      const cap=getLineCapH(li);
-      if(lineLoad[li][w]>0&&cap>0){totalUtil+=lineLoad[li][w]/cap*100;cnt++;}
+function updateKPIs(){
+  if(!sch) return;
+  var ll=sch.ll,al=sch.al;
+  var nightCnt=0,overSet={},util=0,ucnt=0,gapW=0;
+  al.forEach(function(a){ if(a.shift==='Sch3') nightCnt++; });
+  for(var li=0;li<lines.length;li++){
+    if(!lines[li].active) continue;
+    var cap=getLineCap(li);
+    if(cap<=0) continue;
+    for(var w=0;w<WEEKS;w++){
+      if(ll[li][w]>cap) overSet[li]=true;
+      if(ll[li][w]>0){ util+=ll[li][w]/cap*100; ucnt++; }
     }
-  });
-  const avgUtil = cnt>0?Math.round(totalUtil/cnt):0;
-
-  // Ops gap weeks
-  let opsGapWeeks = 0;
-  for(let w=0;w<WEEKS;w++) {
-    const needed = lines.reduce((s,l,li)=>{
-      if(!l.active) return s;
-      const shifts = Math.ceil(lineLoad[li][w]/SHIFT_H);
-      return s + Math.min(shifts,l.maxShiftsDay*5) * l.opsPerShift;
-    },0);
-    if(opsAvailable[w] < needed/5) opsGapWeeks++;
   }
-
-  const setEl=(id,v,cls)=>{const e=document.getElementById(id);if(e){e.textContent=v;e.className='kpi-v '+cls;}};
-  const setH=(id,v,cls)=>{const e=document.getElementById(id);if(e){e.textContent=v;e.className='hkpi-v '+cls;}};
-  setEl('kpi-night',nightCount,nightCount===0?'ok':nightCount<5?'warn':'bad');
-  setEl('kpi-util',avgUtil+'%',avgUtil>=70&&avgUtil<=90?'ok':avgUtil>90?'warn':'warn');
-  setEl('kpi-over',overLines.size,overLines.size===0?'ok':'bad');
-  setEl('kpi-ops',opsGapWeeks,opsGapWeeks===0?'ok':'bad');
-  setH('h-night',nightCount,nightCount===0?'ok':'bad');
-  setH('h-util',avgUtil+'%',avgUtil>=70?'ok':'warn');
-  setH('h-over',overLines.size,overLines.size===0?'ok':'bad');
-  setH('h-ops',opsGapWeeks===0?'OK':opsGapWeeks+' săpt.',opsGapWeeks===0?'ok':'bad');
-  document.getElementById('nb-over').textContent=overLines.size;
-  document.getElementById('nb-night').textContent=nightCount;
-}
-
-// ==================== RENDER ====================
-function renderDashboard() { renderLinesChart(); renderIssues(); }
-
-function renderLinesChart() {
-  if(!schedule) return;
-  const {lineLoad} = schedule;
-  const w = currentWeek;
-  const cap1shift = (4*1+1*1)*SHIFT_H; // ~40h
-  const cap2shift = (4*2+1*2)*SHIFT_H; // ~80h
-  const el = document.getElementById('lines-chart');
-  const wInfo = document.getElementById('week-day-info');
-  if(wInfo) wInfo.textContent = `Capacitate: ${getLineCapH(0)} ore (linie fără sâmbătă)`;
-
-  el.innerHTML = lines.filter(l=>l.active).map((l,_,__)=>{
-    const li = l.id;
-    const used = lineLoad[li][w];
-    const cap = getLineCapH(li);
-    if(cap===0) return '';
-    const pct = Math.round(used/cap*100);
-    const sch1Pct = Math.min(Math.round(Math.min(used,cap1shift)/cap*100),100);
-    const sch2Pct = used>cap1shift?Math.min(Math.round((Math.min(used,cap2shift)-cap1shift)/cap*100),100):0;
-    const sch3Pct = used>cap2shift?Math.min(Math.round((Math.min(used,cap)-cap2shift)/cap*100),100-sch1Pct-sch2Pct):0;
-    const isOver = pct>100;
-    const shift = getShiftLabel(used);
-    const badgeCls = isOver?'b-over':shift==='Sch3'?'b-night':shift==='Sch2'?'b-s2':'b-s1';
-    const badgeTxt = isOver?'SUPRAÎNCĂRCAT':shift;
-    return `<div class="cap-bar-wrap">
-      <div class="cap-bar-header">
-        <span class="cap-bar-name">${l.code} — ${l.name.split('—')[1]?.trim()||l.name} ${l.satEnabled?'<span class="tag tag-sat">Sâm</span>':''}</span>
-        <span style="font-size:11px;color:var(--text2)">${pct}% · ${used.toFixed(1)}h · Ops/sch: ${l.opsPerShift} <span class="badge ${badgeCls}">${badgeTxt}</span></span>
-      </div>
-      <div class="cap-track">
-        ${sch1Pct>0?`<div style="position:absolute;left:0;top:0;height:100%;width:${sch1Pct}%;background:#185FA5;display:flex;align-items:center;padding-left:4px"><span style="font-size:9px;font-weight:600;color:#fff">${sch1Pct>8?'Sch1':''}</span></div>`:''}
-        ${sch2Pct>0?`<div style="position:absolute;left:${sch1Pct}%;top:0;height:100%;width:${sch2Pct}%;background:#854F0B;display:flex;align-items:center;justify-content:center"><span style="font-size:9px;font-weight:600;color:#fff">${sch2Pct>8?'Sch2':''}</span></div>`:''}
-        ${sch3Pct>0?`<div style="position:absolute;left:${sch1Pct+sch2Pct}%;top:0;height:100%;width:${sch3Pct}%;background:#7A1A1A;display:flex;align-items:center;justify-content:center"><span style="font-size:9px;font-weight:600;color:#fff">${sch3Pct>8?'Sch3':''}</span></div>`:''}
-      </div>
-    </div>`;
-  }).join('');
-}
-
-function renderIssues() {
-  if(!schedule) return;
-  const {lineLoad} = schedule;
-  const issues = [];
-  lines.forEach((l,li) => {
-    if(!l.active) return;
-    const cap=getLineCapH(li);
-    const cap2=(4*2+1*2)*SHIFT_H;
-    for(let w=0;w<WEEKS;w++){
-      if(lineLoad[li][w]>cap) issues.push({type:'over',line:li,week:w,val:Math.round(lineLoad[li][w]/cap*100)});
-      else if(lineLoad[li][w]>cap2) issues.push({type:'night',line:li,week:w,val:Math.round(lineLoad[li][w])});
+  var avgU=ucnt>0?Math.round(util/ucnt):0;
+  var overCnt=Object.keys(overSet).length;
+  for(var w=0;w<WEEKS;w++){
+    var need=0;
+    for(var li=0;li<lines.length;li++){
+      if(!lines[li].active) continue;
+      var shifts=Math.ceil(ll[li][w]/SH);
+      need+=Math.min(shifts,lines[li].maxSch*4+cfg.fri)*lines[li].ops;
     }
-  });
-  issues.sort((a,b)=>b.val-a.val);
-  const el=document.getElementById('issues-list');
-  if(!issues.length){el.innerHTML='<div style="color:var(--green);font-size:13px;padding:8px 0">&#10003; Nicio problemă — plan optimizat!</div>';return;}
-  el.innerHTML=issues.slice(0,8).map(iss=>`
-    <div style="display:flex;align-items:center;gap:10px;padding:7px 0;border-bottom:1px solid var(--border);font-size:12px">
-      <span class="badge ${iss.type==='over'?'b-over':'b-night'}">${iss.type==='over'?'Supraîncărcat':'Sch3 noapte'}</span>
-      <span style="color:var(--text2)">${lines[iss.line].code}</span>
-      <span style="color:var(--text3)">W${String(iss.week+1).padStart(2,'0')}</span>
-      <span style="margin-left:auto;font-family:monospace;color:${iss.type==='over'?'var(--red)':'var(--amber)'}">${iss.type==='over'?iss.val+'%':iss.val+' ore'}</span>
-    </div>`).join('')+(issues.length>8?`<div style="color:var(--text3);font-size:11px;padding:6px 0">+ ${issues.length-8} alte probleme...</div>`:'');
+    if(opsAvail[w]<Math.round(need/5)) gapW++;
+  }
+  function se(id,v,c){var e=document.getElementById(id);if(e){e.textContent=v;e.className='kv '+c;}}
+  function sh(id,v,c){var e=document.getElementById(id);if(e){e.textContent=v;e.className='hv '+c;}}
+  se('kpi-n',nightCnt,nightCnt===0?'ok':nightCnt<5?'warn':'bad');
+  se('kpi-u',avgU+'%',avgU>=70&&avgU<=90?'ok':'warn');
+  se('kpi-o',overCnt,overCnt===0?'ok':'bad');
+  se('kpi-op',gapW,gapW===0?'ok':'bad');
+  sh('h-n',nightCnt,nightCnt===0?'ok':'bad');
+  sh('h-u',avgU+'%',avgU>=70?'ok':'warn');
+  sh('h-o',overCnt,overCnt===0?'ok':'bad');
+  sh('h-op',gapW===0?'OK':gapW+' săpt.',gapW===0?'ok':'bad');
+  var nbo=document.getElementById('nb-o'); if(nbo) nbo.textContent=overCnt;
+  var nbn=document.getElementById('nb-n'); if(nbn) nbn.textContent=nightCnt;
 }
 
-function renderCapacity() {
-  if(!schedule) return;
+function colorForPct(p){
+  if(p===0) return '#185FA5';
+  if(p<=50) return '#185FA5';
+  return '#854F0B';
+}
+
+function renderLinesChart(){
+  if(!sch) return;
+  var ll=sch.ll, w=curW;
+  var out='';
+  for(var li=0;li<lines.length;li++){
+    var l=lines[li];
+    if(!l.active) continue;
+    var used=ll[li][w], cap=getLineCap(li);
+    if(cap<=0) continue;
+    var pct=Math.round(used/cap*100);
+    var cap1=getLineCapDay(li), cap2=getLineCapTwoShift(li);
+    var p1=Math.min(Math.round(Math.min(used,cap1)/cap*100),100);
+    var p2=used>cap1?Math.min(Math.round((Math.min(used,cap2)-cap1)/cap*100),100-p1):0;
+    var p3=used>cap2?Math.min(Math.round((Math.min(used,cap)-cap2)/cap*100),100-p1-p2):0;
+    var shift=shiftLabel(used,li);
+    var badgeCl=shift==='Sch3'?'ber':shift==='Sch2'?'bwn':'bok';
+    var satTag=l.sat?'<span style="font-size:9px;color:var(--teal);margin-left:4px">[Sâm]</span>':'';
+    out+='<div style="margin-bottom:8px">';
+    out+='<div style="display:flex;justify-content:space-between;font-size:11px;margin-bottom:3px">';
+    out+='<span style="font-weight:600;color:var(--text)">'+l.code+' '+satTag+'</span>';
+    out+='<span style="color:var(--text2)">'+pct+'% · '+used.toFixed(1)+'h · ops/sch:'+l.ops+' <span class="bdg '+badgeCl+'">'+shift+'</span></span>';
+    out+='</div>';
+    out+='<div class="bar-tr">';
+    if(p1>0) out+='<div style="position:absolute;left:0;top:0;height:100%;width:'+p1+'%;background:#185FA5"></div>';
+    if(p2>0) out+='<div style="position:absolute;left:'+p1+'%;top:0;height:100%;width:'+p2+'%;background:#854F0B"></div>';
+    if(p3>0) out+='<div style="position:absolute;left:'+(p1+p2)+'%;top:0;height:100%;width:'+p3+'%;background:#7A1A1A"></div>';
+    out+='</div></div>';
+  }
+  var el=document.getElementById('lchrt'); if(el) el.innerHTML=out;
+}
+
+function renderIssues(){
+  if(!sch) return;
+  var ll=sch.ll, issues=[], cap2;
+  for(var li=0;li<lines.length;li++){
+    if(!lines[li].active) continue;
+    var cap=getLineCap(li);
+    cap2=getLineCapTwoShift(li);
+    for(var w=0;w<WEEKS;w++){
+      if(ll[li][w]>cap) issues.push({t:'over',li:li,w:w,v:Math.round(ll[li][w]/cap*100)});
+      else if(ll[li][w]>cap2) issues.push({t:'sch3',li:li,w:w,v:Math.round(ll[li][w])});
+    }
+  }
+  issues.sort(function(a,b){return b.v-a.v;});
+  var el=document.getElementById('issues');
+  if(!el) return;
+  if(!issues.length){el.innerHTML='<div style="color:var(--green);font-size:12px;padding:6px 0">✓ Plan optimizat — nicio problemă!</div>';return;}
+  var out='';
+  var show=issues.slice(0,8);
+  for(var i=0;i<show.length;i++){
+    var iss=show[i];
+    out+='<div style="display:flex;align-items:center;gap:8px;padding:5px 0;border-bottom:1px solid var(--border);font-size:11px">';
+    out+='<span class="bdg '+(iss.t==='over'?'ber':'bs3')+'">'+(iss.t==='over'?'Supraîncărcat':'Sch3')+'</span>';
+    out+='<span style="color:var(--text2)">'+lines[iss.li].code+'</span>';
+    out+='<span style="color:var(--text3)">W'+String(iss.w+1).padStart(2,'0')+'</span>';
+    out+='<span style="margin-left:auto;font-family:monospace;color:'+(iss.t==='over'?'var(--red)':'var(--amber)')+'">'+iss.v+(iss.t==='over'?'%':' ore')+'</span>';
+    out+='</div>';
+  }
+  if(issues.length>8) out+='<div style="color:var(--text3);font-size:10px;padding:4px 0">+ '+(issues.length-8)+' altele...</div>';
+  el.innerHTML=out;
+}
+
+function renderDash(){ renderLinesChart(); renderIssues(); }
+
+function renderCap(){
+  if(!sch) return;
   renderLinesChart();
-  const {lineLoad}=schedule;
-  const w=currentWeek;
-  const cap2=(4*2+1*2)*SHIFT_H;
-  document.getElementById('cap-detail').innerHTML=lines.filter(l=>l.active).map(l=>{
-    const li=l.id;
-    const used=lineLoad[li][w];
-    const cap=getLineCapH(li);
-    if(cap===0) return '';
-    const pct=Math.round(used/cap*100);
-    const isOver=pct>100,isNight=used>cap2,isUnder=pct<50;
-    if(capFilter==='over'&&!isOver) return '';
-    if(capFilter==='night'&&!isNight) return '';
-    if(capFilter==='under'&&!isUnder) return '';
-    const sch1Pct=Math.min(Math.round(Math.min(used,(4*1+1)*SHIFT_H)/cap*100),100);
-    const sch2Pct=used>(4+1)*SHIFT_H?Math.min(Math.round((Math.min(used,cap2)-(4+1)*SHIFT_H)/cap*100),100-sch1Pct):0;
-    const sch3Pct=used>cap2?Math.min(Math.round((used-cap2)/cap*100),100-sch1Pct-sch2Pct):0;
-    return `<div class="cap-bar-wrap">
-      <div class="cap-bar-header">
-        <span class="cap-bar-name">${l.code} <span style="color:var(--text3);font-size:10px">cap:${cap}h · ops/sch:${l.opsPerShift} ${l.satEnabled?'· Sâm':'· No Sâm'}</span></span>
-        <span style="font-size:11px;color:${isOver?'var(--red)':isNight?'var(--amber)':isUnder?'var(--text3)':'var(--green)'}">
-          ${pct}% · ${used.toFixed(1)}h · ${Math.ceil(used/SHIFT_H)} sch.
-          ${isOver?'<span class="badge b-over">SUPRAÎNCĂRCAT</span>':isNight?'<span class="badge b-night">Sch3 necesar</span>':isUnder?'<span class="badge" style="background:var(--bg4);color:var(--text3)">Sub 50%</span>':'<span class="badge b-ok">Optim</span>'}
-        </span>
-      </div>
-      <div class="cap-track">
-        ${sch1Pct>0?`<div style="position:absolute;left:0;top:0;height:100%;width:${sch1Pct}%;background:#185FA5"></div>`:''}
-        ${sch2Pct>0?`<div style="position:absolute;left:${sch1Pct}%;top:0;height:100%;width:${sch2Pct}%;background:#854F0B"></div>`:''}
-        ${sch3Pct>0?`<div style="position:absolute;left:${sch1Pct+sch2Pct}%;top:0;height:100%;width:${sch3Pct}%;background:#7A1A1A"></div>`:''}
-      </div>
-    </div>`;
-  }).join('');
+  var ll=sch.ll,w=curW,out='';
+  for(var li=0;li<lines.length;li++){
+    var l=lines[li];
+    if(!l.active) continue;
+    var used=ll[li][w],cap=getLineCap(li);
+    if(cap<=0) continue;
+    var pct=Math.round(used/cap*100);
+    var isOver=pct>100,isSch3=used>getLineCapTwoShift(li),isUnder=pct<50;
+    if(capF==='over'&&!isOver) continue;
+    if(capF==='sch3'&&!isSch3) continue;
+    if(capF==='under'&&!isUnder) continue;
+    var cap1=getLineCapDay(li),cap2=getLineCapTwoShift(li);
+    var p1=Math.min(Math.round(Math.min(used,cap1)/cap*100),100);
+    var p2=used>cap1?Math.min(Math.round((Math.min(used,cap2)-cap1)/cap*100),100-p1):0;
+    var p3=used>cap2?Math.min(Math.round((Math.min(used,cap)-cap2)/cap*100),100-p1-p2):0;
+    var sc=isOver?'ber':isSch3?'bs3':isUnder?'bwn':'bok';
+    var stxt=isOver?'DEPĂȘIT':isSch3?'Sch3 necesar':isUnder?'Sub 50%':'Optim';
+    out+='<div style="margin-bottom:10px">';
+    out+='<div style="display:flex;justify-content:space-between;font-size:11px;margin-bottom:3px">';
+    out+='<span style="font-weight:600">'+l.code+' <span style="color:var(--text3);font-size:9px">cap:'+cap+'h ops/sch:'+l.ops+(l.sat?' Sâm':'')+'</span></span>';
+    out+='<span>'+pct+'% · '+used.toFixed(1)+'h · '+Math.ceil(used/SH)+' sch. <span class="bdg '+sc+'">'+stxt+'</span></span>';
+    out+='</div><div class="bar-tr">';
+    if(p1>0) out+='<div style="position:absolute;left:0;top:0;height:100%;width:'+p1+'%;background:#185FA5"></div>';
+    if(p2>0) out+='<div style="position:absolute;left:'+p1+'%;top:0;height:100%;width:'+p2+'%;background:#854F0B"></div>';
+    if(p3>0) out+='<div style="position:absolute;left:'+(p1+p2)+'%;top:0;height:100%;width:'+p3+'%;background:#7A1A1A"></div>';
+    out+='</div></div>';
+  }
+  var el=document.getElementById('cap-det'); if(el) el.innerHTML=out;
 }
 
-function renderHeatmap() {
-  if(!schedule) return;
-  const {lineLoad}=schedule;
-  const tbl=document.getElementById('heatmap-table');
-  const wH=Array.from({length:WEEKS},(_,i)=>`<th style="padding:3px 4px;background:var(--bg3);color:var(--text3);font-size:9px;position:sticky;top:0">W${String(i+1).padStart(2,'0')}</th>`).join('');
-  tbl.innerHTML=`<thead><tr><th style="text-align:left;padding:4px 8px;background:var(--bg3);color:var(--text3);font-size:10px;position:sticky;top:0;left:0;z-index:3">Linie</th>${wH}</tr></thead><tbody>`+
-    lines.filter(l=>l.active).map(l=>{
-      const li=l.id;const cap=getLineCapH(li);
-      const cells=Array.from({length:WEEKS},(_,w)=>{
-        if(cap===0) return `<td style="border:1px solid var(--bg)"><span class="hm-cell hm-x">—</span></td>`;
-        const pct=Math.round(lineLoad[li][w]/cap*100);
-        const cls=pct===0?'hm-0':pct<30?'hm-1':pct<50?'hm-2':pct<70?'hm-3':pct<85?'hm-4':pct<100?'hm-5':pct<115?'hm-6':'hm-7';
-        return `<td style="border:1px solid var(--bg)"><span class="hm-cell ${cls}" title="${l.code} W${String(w+1).padStart(2,'0')}: ${pct}%">${pct===0?'·':pct>100?'!':pct+'%'}</span></td>`;
-      }).join('');
-      return `<tr><td style="padding:3px 8px;font-size:11px;font-weight:500;color:var(--text2);position:sticky;left:0;background:var(--bg2);z-index:1;border-bottom:1px solid var(--border)">${l.code}</td>${cells}</tr>`;
-    }).join('')+'</tbody>';
+function renderHmap(){
+  if(!sch) return;
+  var ll=sch.ll,tbl=document.getElementById('hmt');
+  if(!tbl) return;
+  var wH='<th style="padding:3px 4px;background:var(--bg3);color:var(--text3);font-size:8px;position:sticky;top:0;white-space:nowrap">Linie</th>';
+  for(var w=0;w<WEEKS;w++) wH+='<th style="padding:2px 3px;background:var(--bg3);color:var(--text3);font-size:8px;position:sticky;top:0">W'+String(w+1).padStart(2,'0')+'</th>';
+  var rows='';
+  for(var li=0;li<lines.length;li++){
+    if(!lines[li].active) continue;
+    var cap=getLineCap(li);
+    rows+='<tr><td style="padding:2px 8px;font-size:10px;font-weight:600;color:var(--text2);position:sticky;left:0;background:var(--bg2);z-index:1;border-bottom:1px solid var(--border)">'+lines[li].code+'</td>';
+    for(var w=0;w<WEEKS;w++){
+      if(cap<=0){rows+='<td style="border:1px solid var(--bg)"><span class="hm hmx">–</span></td>';continue;}
+      var pct=Math.round(ll[li][w]/cap*100);
+      var cl=pct===0?'hm0':pct<30?'hm1':pct<50?'hm2':pct<70?'hm3':pct<85?'hm4':pct<100?'hm5':pct<115?'hm6':'hm7';
+      rows+='<td style="border:1px solid var(--bg)"><span class="hm '+cl+'" title="'+lines[li].code+' W'+String(w+1).padStart(2,'0')+': '+pct+'%">'+(pct===0?'·':pct>100?'!':pct+'')+'</span></td>';
+    }
+    rows+='</tr>';
+  }
+  tbl.innerHTML='<thead><tr>'+wH+'</tr></thead><tbody>'+rows+'</tbody>';
 }
 
-function renderOrders() {
-  if(!schedule) return;
-  const {allocs}=schedule;
-  let filtered=allocs;
-  if(ordersFilter==='night') filtered=allocs.filter(a=>a.shift==='Sch3');
-  else if(ordersFilter==='over') filtered=allocs.filter(a=>a.overload);
-  else if(ordersFilter==='moved') filtered=allocs.filter(a=>a.moved);
-  else if(ordersFilter==='sat') filtered=allocs.filter(a=>a.useSat);
-  const tbody=document.getElementById('orders-tbody');
-  tbody.innerHTML=filtered.slice(0,300).map(a=>{
-    const item=items[a.itemIdx];const line=lines[a.lineIdx];
-    const cap=getLineCapH(a.lineIdx);
-    const load=schedule.lineLoad[a.lineIdx][a.week];
-    const util=Math.round(load/cap*100);
-    const shifts=Math.ceil(a.hours/SHIFT_H);
-    const opsNec=shifts*line.opsPerShift;
-    const shiftCls=a.shift==='Sch3'?'b-night':a.shift==='Sch2'?'b-s2':'b-s1';
-    return `<tr>
-      <td class="mono">${item.code}</td>
-      <td style="font-size:11px">${line.code}</td>
-      <td class="mono">W${String(a.week+1).padStart(2,'0')}</td>
-      <td class="mono">${a.qty.toLocaleString()}</td>
-      <td class="mono">${a.runRate} buc/h</td>
-      <td class="mono">${a.hours.toFixed(1)}</td>
-      <td class="mono">${shifts}</td>
-      <td><span class="badge ${shiftCls}">${a.shift}</span>${a.useSat?'<span class="badge b-sat" style="margin-left:3px">+Sâm</span>':''}</td>
-      <td><span style="color:${util>100?'var(--red)':util>85?'var(--amber)':'var(--green)';font-family:monospace;font-size:11px}">${util}%</span></td>
-      <td class="mono">${opsNec}</td>
-      <td>${a.moved?'<span class="badge b-moved">&#10003; AI</span>':a.overload?'<span class="badge b-over">Depășit</span>':'<span style="color:var(--text3);font-size:10px">—</span>'}</td>
-    </tr>`;
-  }).join('');
-}
-
-function renderLinesTable() {
-  document.getElementById('lines-tbody').innerHTML=lines.map((l,li)=>`
-    <tr>
-      <td class="mono">${l.code}</td>
-      <td><input class="fi" style="padding:4px 8px;font-size:12px" value="${l.name}" onchange="lines[${li}].name=this.value"></td>
-      <td class="mono" style="color:var(--green)">${getLineCapH(li)}h</td>
-      <td><select class="fs" style="padding:4px 8px;font-size:11px" onchange="lines[${li}].maxShiftsDay=+this.value">
-        <option ${l.maxShiftsDay===1?'selected':''}>1</option>
-        <option ${l.maxShiftsDay===2?'selected':''}>2</option>
-        <option ${l.maxShiftsDay===3?'selected':''}>3</option>
-      </select></td>
-      <td><input type="number" class="fi-sm" value="${l.opsPerShift}" min="1" max="20" onchange="lines[${li}].opsPerShift=+this.value"></td>
-      <td><input type="checkbox" ${l.satEnabled?'checked':''} onchange="lines[${li}].satEnabled=this.checked" style="accent-color:var(--teal)"> <span style="font-size:11px;color:var(--teal)">${l.satEnabled?'Activă':'—'}</span></td>
-      <td><button class="del-btn" onclick="deleteLine(${li})">&#10005; Șterge</button></td>
-    </tr>`).join('');
-}
-
-function addLine() {
-  const n = lines.length+1;
-  lines.push({id:lines.length,code:`RW${String(n).padStart(2,'0')}`,name:`RW${String(n).padStart(2,'0')} — Linie nouă`,satEnabled:false,maxShiftsDay:3,opsPerShift:2,active:true});
-  // Add run rates for new line in all items
-  items.forEach(item=>{ item.runRates[lines.length-1]=0; });
-  renderLinesTable();
-  renderItemsTable();
-}
-
-function deleteLine(li) {
-  if(!confirm(`Ștergi linia ${lines[li].code}?`)) return;
-  lines[li].active=false;
-  renderLinesTable();
-}
-
-function saveLines() { runOptimizerLogic(); nav('dashboard',document.querySelector('.nav-item')); }
-
-function renderItemsTable() {
-  const activeLines = lines.filter(l=>l.active);
-  // Header
-  const thead = document.getElementById('items-thead');
-  thead.innerHTML='<tr><th>Item</th><th>Descriere</th>'+activeLines.map(l=>`<th style="text-align:center">${l.code}<br><span style="font-size:9px;color:var(--text3)">buc/h</span></th>`).join('')+'</tr>';
-  // Body
-  const tbody = document.getElementById('items-tbody');
-  tbody.innerHTML=items.map((item,i)=>`
-    <tr>
-      <td class="mono">${item.code}</td>
-      <td style="font-size:11px;color:var(--text2)">${item.desc}</td>
-      ${activeLines.map(l=>`<td style="text-align:center">
-        <input type="number" class="fi-sm" value="${item.runRates[l.id]||0}" min="0"
-          onchange="items[${i}].runRates[${l.id}]=+this.value"
-          style="background:${item.runRates[l.id]>0?'#0A1A0A':'var(--bg3)'}">
-      </td>`).join('')}
-    </tr>`).join('');
-}
-
-function addItem() {
-  const fam = FAM[Math.floor(Math.random()*10)];
-  const rr = {};
-  lines.forEach(l=>{ rr[l.id]=0; });
-  items.push({id:items.length,code:`${fam}-NEW`,desc:'Nou item',runRates:rr});
-  renderItemsTable();
-}
-
-function saveItems() { runOptimizerLogic(); }
-
-function renderOpsPerLine() {
-  document.getElementById('ops-per-line').innerHTML=lines.filter(l=>l.active).map(l=>`
-    <div style="display:flex;justify-content:space-between;align-items:center;padding:6px 0;border-bottom:1px solid var(--border);font-size:12px">
-      <span style="color:var(--text2)">${l.code}</span>
-      <span style="display:flex;align-items:center;gap:8px">
-        <input type="number" class="fi-sm" value="${l.opsPerShift}" min="1" max="30"
-          onchange="lines[${l.id}].opsPerShift=+this.value;renderOpsGap()">
-        <span style="color:var(--text3);font-size:10px">ops/schimb</span>
-      </span>
-    </div>`).join('');
-}
-
-function renderOpsPerWeek() {
-  document.getElementById('ops-per-week').innerHTML=Array.from({length:WEEKS},(_,w)=>`
-    <div style="display:flex;align-items:center;gap:8px;padding:4px 0;border-bottom:1px solid var(--border);font-size:12px">
-      <span style="color:var(--text3);min-width:40px">W${String(w+1).padStart(2,'0')}</span>
-      <input type="number" class="fi-sm" value="${opsAvailable[w]}" min="0"
-        onchange="opsAvailable[${w}]=+this.value;renderOpsGap()" style="width:60px">
-      <span style="font-size:10px;color:var(--text3)">disponibili</span>
-    </div>`).join('');
-}
-
-function renderOpsGap() {
-  if(!schedule) return;
-  const {lineLoad}=schedule;
-  const el=document.getElementById('ops-gap');
-  const rows=Array.from({length:Math.min(WEEKS,56)},(_,w)=>{
-    const needed=lines.filter(l=>l.active).reduce((s,l)=>{
-      const shifts=Math.ceil(lineLoad[l.id][w]/SHIFT_H);
-      return s+Math.min(shifts,(4*l.maxShiftsDay+2))*l.opsPerShift;
-    },0);
-    const neededPerDay=Math.round(needed/5);
-    const avail=opsAvailable[w];
-    const gap=avail-neededPerDay;
-    return {w,neededPerDay,avail,gap};
+function renderOrd(){
+  if(!sch) return;
+  var al=sch.al,ll=sch.ll,out='';
+  var filtered=al.filter(function(a){
+    if(ordF==='sch3') return a.shift==='Sch3';
+    if(ordF==='over') return a.over;
+    if(ordF==='moved') return a.moved;
+    return true;
   });
-  el.innerHTML=`<div style="overflow-x:auto"><table><thead><tr>
-    <th>Săpt.</th><th>Ops. necesari/zi</th><th>Ops. disponibili</th><th>Diferență</th><th>Status</th>
-  </tr></thead><tbody>`+rows.map(r=>`<tr>
-    <td class="mono">W${String(r.w+1).padStart(2,'0')}</td>
-    <td class="mono">${r.neededPerDay}</td>
-    <td class="mono">${r.avail}</td>
-    <td class="mono" style="color:${r.gap>=0?'var(--green)':'var(--red)'}">${r.gap>=0?'+':''}${r.gap}</td>
-    <td>${r.gap>=0?'<span class="badge b-ok">OK</span>':'<span class="badge b-over">Lipsă '+Math.abs(r.gap)+' ops</span>'}</td>
-  </tr>`).join('')+'</tbody></table></div>';
+  for(var i=0;i<Math.min(filtered.length,300);i++){
+    var a=filtered[i];
+    var item=items[a.ii],line=lines[a.li];
+    var cap=getLineCap(a.li);
+    var load=ll[a.li][a.w];
+    var util=cap>0?Math.round(load/cap*100):0;
+    var shifts=Math.ceil(a.hrs/SH);
+    var opsN=shifts*line.ops;
+    var sc=a.shift==='Sch3'?'bs3':a.shift==='Sch2'?'bs2':'bs1';
+    var uc=util>100?'var(--red)':util>85?'var(--amber)':'var(--green)';
+    out+='<tr><td class="mn">'+item.code+'</td><td style="font-size:10px">'+line.code+'</td>';
+    out+='<td class="mn">W'+String(a.w+1).padStart(2,'0')+'</td>';
+    out+='<td class="mn">'+a.qty.toLocaleString()+'</td>';
+    out+='<td class="mn">'+a.rr+' b/h</td>';
+    out+='<td class="mn">'+a.hrs.toFixed(1)+'</td>';
+    out+='<td class="mn">'+shifts+'</td>';
+    out+='<td><span class="bdg '+sc+'">'+a.shift+'</span></td>';
+    out+='<td><span style="color:'+uc+';font-family:monospace">'+util+'%</span></td>';
+    out+='<td class="mn">'+opsN+'</td>';
+    out+='<td>'+(a.moved?'<span class="bdg bmv">✓ AI</span>':a.over?'<span class="bdg ber">Depășit</span>':'<span style="color:var(--text3);font-size:9px">—</span>')+'</td></tr>';
+  }
+  var b=document.getElementById('ord-body'); if(b) b.innerHTML=out;
 }
 
-function renderDemandTable() {
-  const showW=20;
-  const tbl=document.getElementById('demand-table');
-  const wH=Array.from({length:showW},(_,i)=>`<th style="padding:4px 8px;background:var(--bg3);color:var(--text3);position:sticky;top:0">W${String(i+1).padStart(2,'0')}</th>`).join('');
-  tbl.innerHTML=`<thead><tr><th style="padding:4px 8px;background:var(--bg3);color:var(--text3);position:sticky;top:0;left:0;z-index:3">Item</th>${wH}<th style="background:var(--bg3);color:var(--text3);position:sticky;top:0">...</th></tr></thead><tbody>`+
-    items.map((item,i)=>`<tr><td style="padding:3px 8px;font-family:monospace;font-size:11px;font-weight:500;position:sticky;left:0;background:var(--bg2);z-index:1">${item.code}</td>`+
-      Array.from({length:showW},(_,w)=>`<td style="padding:2px 4px"><input type="number" min="0" step="10" value="${demand[i][w]}" onchange="demand[${i}][${w}]=+this.value" style="width:52px;padding:2px 4px;background:${demand[i][w]>0?'#0A1A0A':'var(--bg3)'};border:1px solid var(--border);border-radius:4px;color:var(--text);font-size:10px;font-family:monospace;text-align:right;outline:none"></td>`).join('')+
-      '<td style="color:var(--text3);font-size:10px;padding:3px 6px">W21-W56</td></tr>'
-    ).join('')+'</tbody>';
+function renderLinesTable(){
+  var out='';
+  for(var li=0;li<lines.length;li++){
+    var l=lines[li];
+    out+='<tr>';
+    out+='<td class="mn">'+l.code+'</td>';
+    out+='<td><input class="fi" style="padding:3px 7px;font-size:11px" value="'+l.name+'" onchange="lines['+li+'].name=this.value"></td>';
+    out+='<td class="mn" style="color:var(--green)">'+getLineCap(li)+'h</td>';
+    out+='<td><select class="fs" style="padding:3px 7px;font-size:10px" onchange="lines['+li+'].maxSch=+this.value;this.closest(\'tr\').cells[2].textContent=getLineCap('+li+')+'+'h\'">';
+    for(var s=1;s<=3;s++) out+='<option value="'+s+'"'+(l.maxSch===s?' selected':'')+'>'+s+'</option>';
+    out+='</select></td>';
+    out+='<td><input type="number" class="fi-n" value="'+l.ops+'" min="1" max="30" onchange="lines['+li+'].ops=+this.value"></td>';
+    out+='<td><label style="cursor:pointer"><input type="checkbox" '+(l.sat?'checked':'')+' onchange="lines['+li+'].sat=this.checked;this.closest(\'tr\').cells[2].textContent=getLineCap('+li+')+'+'h\'" style="accent-color:var(--teal)"> <span style="font-size:10px;color:var(--teal)">'+(l.sat?'Da':'Nu')+'</span></label></td>';
+    out+='<td><span style="font-size:10px;color:'+(l.active?'var(--green)':'var(--red)')+'">'+( l.active?'Activ':'Inactiv')+'</span></td>';
+    out+='<td><button class="btn-del" onclick="toggleLine('+li+')">'+( l.active?'✕ Dezactivează':'✓ Activează')+'</button></td>';
+    out+='</tr>';
+  }
+  var b=document.getElementById('lines-body'); if(b) b.innerHTML=out;
 }
 
-function randomizeDemand() {
-  demand=Array.from({length:items.length},(_,i)=>Array.from({length:WEEKS},(_,w)=>{
-    if(Math.random()<0.2) return 0;
-    return 50+Math.floor(Math.random()*700)+(w%8===0?Math.floor(Math.random()*300):0);
-  }));
-  renderDemandTable();
+function addLine(){
+  var n=lines.length+1;
+  var rr={};
+  for(var li=0;li<lines.length;li++) rr[li]=0;
+  lines.push({id:lines.length,code:'RW'+String(n).padStart(2,'0'),name:'Linie '+String(n).padStart(2,'0'),sat:false,maxSch:3,ops:2,active:true});
+  var newLi=lines.length-1;
+  for(var i=0;i<items.length;i++) items[i].rr[newLi]=0;
+  renderLinesTable();
 }
 
-function saveDemand() { runOptimizerLogic(); nav('dashboard',document.querySelector('.nav-item')); }
-function saveOperators() { renderOpsGap(); updateKPIs(); }
-function saveItems() { runOptimizerLogic(); }
-
-function saveSettings() {
-  settings.h1=+document.getElementById('s-h1').value;
-  settings.h2=+document.getElementById('s-h2').value;
-  settings.h3=+document.getElementById('s-h3').value;
-  settings.mth=+document.getElementById('s-mth').value;
-  settings.fri=+document.getElementById('s-fri').value;
-  settings.window=+document.getElementById('s-window').value;
-  const d=document.getElementById('cap-formula-display');
-  if(d) d.innerHTML=lines.filter(l=>l.active).slice(0,5).map(l=>
-    `<div style="font-size:11px;color:var(--text2);padding:3px 0">${l.code}: ${getLineCapH(l.id)}h/săpt${l.satEnabled?' (cu Sâm)':''}</div>`
-  ).join('')+'<div style="font-size:10px;color:var(--text3);margin-top:6px">... și celelalte linii active</div>';
+function toggleLine(li){
+  lines[li].active=!lines[li].active;
+  renderLinesTable();
 }
 
-// ==================== NAVIGATION ====================
-function nav(view, el) {
-  document.querySelectorAll('.nav-item').forEach(n=>n.classList.remove('active'));
-  if(el) el.classList.add('active');
-  document.querySelectorAll('.view').forEach(v=>v.classList.remove('active'));
-  document.getElementById('view-'+view).classList.add('active');
-  const lbl2=document.getElementById('week-label2');
-  if(lbl2) lbl2.textContent=`W${String(currentWeek+1).padStart(2,'0')}`;
+function saveAndRun(){
+  runOptimizerLogic();
+  nav('dash',document.querySelector('.ni'));
+}
+
+function renderItemsTable(){
+  var actL=lines.filter(function(l){return l.active;});
+  var thead='<thead><tr><th>Item</th><th>Descriere</th>';
+  for(var i=0;i<actL.length;i++) thead+='<th style="text-align:center">'+actL[i].code+'<br><span style="font-size:8px;color:var(--text3)">buc/h</span></th>';
+  thead+='</tr></thead>';
+  var tbody='<tbody>';
+  for(var i=0;i<items.length;i++){
+    tbody+='<tr><td class="mn">'+items[i].code+'</td><td style="font-size:10px;color:var(--text2)">'+items[i].desc+'</td>';
+    for(var j=0;j<actL.length;j++){
+      var li=actL[j].id;
+      var v=items[i].rr[li]||0;
+      tbody+='<td style="text-align:center"><input type="number" class="fi-n" value="'+v+'" min="0" onchange="items['+i+'].rr['+li+']=+this.value;this.style.background=this.value>0?\'#0A1A0A\':\'var(--bg3)\'" style="background:'+(v>0?'#0A1A0A':'var(--bg3)')+'"></td>';
+    }
+    tbody+='</tr>';
+  }
+  tbody+='</tbody>';
+  var t=document.getElementById('items-tbl');
+  if(t) t.innerHTML=thead+tbody;
+}
+
+function addItem(){
+  var fam=FAM[Math.floor(Math.random()*10)];
+  var rr={};
+  for(var li=0;li<lines.length;li++) rr[li]=0;
+  items.push({id:items.length,code:fam+'-NEW',desc:'Item nou',rr:rr});
+  renderItemsTable();
+}
+
+function renderOpsLine(){
+  var out='';
+  for(var li=0;li<lines.length;li++){
+    if(!lines[li].active) continue;
+    out+='<div style="display:flex;justify-content:space-between;align-items:center;padding:5px 0;border-bottom:1px solid var(--border);font-size:11px">';
+    out+='<span style="color:var(--text2)">'+lines[li].code+'</span>';
+    out+='<span style="display:flex;align-items:center;gap:6px"><input type="number" class="fi-n" value="'+lines[li].ops+'" min="1" max="30" onchange="lines['+li+'].ops=+this.value;renderOpsGap()"><span style="color:var(--text3);font-size:10px">ops/schimb</span></span>';
+    out+='</div>';
+  }
+  var el=document.getElementById('ops-line'); if(el) el.innerHTML=out;
+}
+
+function renderOpsWeek(){
+  var out='';
+  for(var w=0;w<WEEKS;w++){
+    out+='<div style="display:flex;align-items:center;gap:6px;padding:3px 0;border-bottom:1px solid var(--border);font-size:11px">';
+    out+='<span style="color:var(--text3);min-width:38px;font-family:monospace">W'+String(w+1).padStart(2,'0')+'</span>';
+    out+='<input type="number" class="fi-n" value="'+opsAvail[w]+'" min="0" onchange="opsAvail['+w+']=+this.value;renderOpsGap()" style="width:55px">';
+    out+='<span style="font-size:9px;color:var(--text3)">disponibili/zi</span>';
+    out+='</div>';
+  }
+  var el=document.getElementById('ops-week'); if(el) el.innerHTML=out;
+}
+
+function renderOpsGap(){
+  if(!sch) return;
+  var ll=sch.ll,out='';
+  out+='<div style="overflow-x:auto"><table><thead><tr><th>Săpt.</th><th>Nec./zi</th><th>Dispon./zi</th><th>Diferență</th><th>Status</th></tr></thead><tbody>';
+  for(var w=0;w<WEEKS;w++){
+    var need=0;
+    for(var li=0;li<lines.length;li++){
+      if(!lines[li].active) continue;
+      var shifts=Math.ceil(ll[li][w]/SH);
+      need+=Math.min(shifts,lines[li].maxSch*4+cfg.fri)*lines[li].ops;
+    }
+    var needDay=Math.round(need/5);
+    var avail=opsAvail[w];
+    var gap=avail-needDay;
+    out+='<tr><td class="mn">W'+String(w+1).padStart(2,'0')+'</td>';
+    out+='<td class="mn">'+needDay+'</td><td class="mn">'+avail+'</td>';
+    out+='<td class="mn" style="color:'+(gap>=0?'var(--green)':'var(--red)')+'">'+(gap>=0?'+':'')+gap+'</td>';
+    out+='<td>'+(gap>=0?'<span class="bdg bok">OK</span>':'<span class="bdg ber">Lipsă '+Math.abs(gap)+'</span>')+'</td></tr>';
+  }
+  out+='</tbody></table></div>';
+  var el=document.getElementById('ops-gap'); if(el) el.innerHTML=out;
+}
+
+function renderDemTable(){
+  var showW=20;
+  var thead='<thead><tr><th style="position:sticky;left:0;z-index:3;background:var(--bg3)">Item</th>';
+  for(var w=0;w<showW;w++) thead+='<th style="position:sticky;top:0;background:var(--bg3)">W'+String(w+1).padStart(2,'0')+'</th>';
+  thead+='<th style="background:var(--bg3)">...</th></tr></thead>';
+  var tbody='<tbody>';
+  for(var i=0;i<items.length;i++){
+    tbody+='<tr><td style="padding:2px 8px;font-family:monospace;font-size:10px;font-weight:600;position:sticky;left:0;background:var(--bg2);z-index:1;border-bottom:1px solid var(--border)">'+items[i].code+'</td>';
+    for(var w=0;w<showW;w++){
+      var v=demand[i][w];
+      tbody+='<td style="padding:2px 3px"><input type="number" min="0" step="10" value="'+v+'" onchange="demand['+i+']['+w+']=+this.value;this.style.background=this.value>0?\'#0A1A0A\':\'var(--bg3)\'" style="width:50px;padding:2px 4px;background:'+(v>0?'#0A1A0A':'var(--bg3)')+';border:1px solid var(--border);border-radius:3px;color:var(--text);font-size:9px;font-family:monospace;text-align:right;outline:none"></td>';
+    }
+    tbody+='<td style="color:var(--text3);font-size:9px;padding:2px 5px">W21–W56</td></tr>';
+  }
+  tbody+='</tbody>';
+  var t=document.getElementById('dem-tbl'); if(t) t.innerHTML=thead+tbody;
+}
+
+function randomDem(){
+  for(var i=0;i<items.length;i++)
+    for(var w=0;w<WEEKS;w++)
+      demand[i][w]=Math.random()<0.2?0:50+Math.floor(Math.random()*700)+(w%8===0?Math.floor(Math.random()*300):0);
+  renderDemTable();
+}
+
+function saveDemand(){ runOptimizerLogic(); nav('dash',document.querySelector('.ni')); }
+
+function saveCfg(){
+  cfg.s1=+(document.getElementById('c1')||{value:8}).value;
+  cfg.s2=+(document.getElementById('c2')||{value:8}).value;
+  cfg.s3=+(document.getElementById('c3')||{value:8}).value;
+  cfg.mth=+(document.getElementById('c4')||{value:3}).value;
+  cfg.fri=+(document.getElementById('c5')||{value:2}).value;
+  cfg.win=+(document.getElementById('c6')||{value:2}).value;
+  var el=document.getElementById('cap-calc');
+  if(el){
+    var out='';
+    for(var li=0;li<Math.min(lines.length,8);li++){
+      if(!lines[li].active) continue;
+      out+='<div style="font-size:11px;color:var(--text2);padding:2px 0">'+lines[li].code+': '+getLineCap(li)+'h/săpt'+(lines[li].sat?' (cu Sâm)':'')+'</div>';
+    }
+    el.innerHTML=out;
+  }
+}
+
+// ===== NAV =====
+function nav(view, el){
+  document.querySelectorAll('.ni').forEach(function(n){n.classList.remove('on');});
+  if(el) el.classList.add('on');
+  document.querySelectorAll('.view').forEach(function(v){v.classList.remove('on');});
+  var vEl=document.getElementById('view-'+view);
+  if(vEl) vEl.classList.add('on');
+  var wl2=document.getElementById('wl2');
+  if(wl2) wl2.textContent='W'+String(curW+1).padStart(2,'0');
   if(view==='lines') renderLinesTable();
   if(view==='items') renderItemsTable();
-  if(view==='operators'){renderOpsPerLine();renderOpsPerWeek();renderOpsGap();}
-  if(view==='demand') renderDemandTable();
-  if(view==='settings') saveSettings();
-  if(view==='capacity') renderCapacity();
-  if(view==='heatmap') renderHeatmap();
-  if(view==='orders') renderOrders();
+  if(view==='ops'){renderOpsLine();renderOpsWeek();renderOpsGap();}
+  if(view==='dem') renderDemTable();
+  if(view==='cfg') saveCfg();
+  if(view==='cap') renderCap();
+  if(view==='hmap') renderHmap();
+  if(view==='ord') renderOrd();
 }
 
-function changeWeek(dir) {
-  currentWeek=Math.max(0,Math.min(WEEKS-1,currentWeek+dir));
-  const v=`W${String(currentWeek+1).padStart(2,'0')}`;
-  ['week-label','week-label2'].forEach(id=>{const e=document.getElementById(id);if(e)e.textContent=v;});
-  renderLinesChart();
-  renderCapacity();
+function chW(d){
+  curW=Math.max(0,Math.min(WEEKS-1,curW+d));
+  var v='W'+String(curW+1).padStart(2,'0');
+  ['wl1','wl2'].forEach(function(id){var e=document.getElementById(id);if(e)e.textContent=v;});
+  renderLinesChart(); renderCap();
 }
 
-function toggleF(el, filter, type) {
-  document.querySelectorAll('#view-capacity .fchip').forEach(c=>c.classList.remove('on'));
-  el.classList.add('on');
-  capFilter=filter;
-  renderCapacity();
+function setF(el,f){
+  document.querySelectorAll('#view-cap .fchip').forEach(function(c){c.classList.remove('on');});
+  el.classList.add('on'); capF=f; renderCap();
+}
+function setOF(el,f){
+  document.querySelectorAll('#view-ord .fchip').forEach(function(c){c.classList.remove('on');});
+  el.classList.add('on'); ordF=f; renderOrd();
 }
 
-function filterOrders(f,el) {
-  document.querySelectorAll('#orders-filters .fchip').forEach(c=>c.classList.remove('on'));
-  el.classList.add('on');
-  ordersFilter=f;
-  renderOrders();
-}
-
-function runOptimizer() {
-  const btn=document.getElementById('run-btn');
-  btn.disabled=true; btn.textContent='⏳ Optimizare...';
-  document.getElementById('opt-progress').style.display='block';
-  const steps=['os1','os2','os3','os4','os5','os6'];
-  const delays=[0,500,1000,1600,2200,2800];
-  steps.forEach((s,i)=>{
-    setTimeout(()=>{
-      if(i>0) document.getElementById(steps[i-1]).className='opt-step done';
-      document.getElementById(s).className='opt-step active';
-    },delays[i]);
-  });
-  setTimeout(()=>{
-    document.getElementById('os6').className='opt-step done';
+function runOpt(){
+  var btn=document.getElementById('rbtn');
+  btn.disabled=true; btn.textContent='⏳...';
+  setTimeout(function(){
     runOptimizerLogic();
     btn.disabled=false; btn.textContent='✓ Re-optimizează';
-    setTimeout(()=>{ document.getElementById('opt-progress').style.display='none'; },1500);
-  },3400);
+  },300);
 }
 
-// ==================== INIT ====================
+// ===== INIT =====
 runOptimizerLogic();
 </script>
 </body>
