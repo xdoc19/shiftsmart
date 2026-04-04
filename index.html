@@ -250,12 +250,31 @@ tr:hover td{background:var(--bg3)}
 
   <!-- DEMAND -->
   <div class="view" id="view-dem">
-    <div class="frow" style="margin-bottom:10px">
-      <button class="btn-save" onclick="saveDemand()">✓ Salvează & Recalculează</button>
+    <div class="frow" style="margin-bottom:8px">
+      <button class="btn-save" onclick="saveDemand()">✓ Salvează &amp; Recalculează</button>
       <button style="background:var(--bg3);border:1px solid var(--border);color:var(--text2);border-radius:6px;padding:5px 12px;cursor:pointer;font-size:11px" onclick="randomDem()">⚄ Demo aleatoriu</button>
-      <span style="font-size:10px;color:var(--text2)">Afișate primele 20 săptămâni din 56</span>
+      <label style="background:var(--blue-bg);border:1px solid var(--blue-d);color:var(--blue);border-radius:6px;padding:5px 12px;cursor:pointer;font-size:11px">
+        ↑ Import CSV
+        <input type="file" id="dem-import" accept=".csv" style="display:none" onchange="importDemandCSV(this)">
+      </label>
+      <button style="background:var(--bg3);border:1px solid var(--border);color:var(--teal);border-radius:6px;padding:5px 12px;cursor:pointer;font-size:11px" onclick="exportDemandCSV()">↓ Export CSV</button>
     </div>
-    <div style="overflow:auto;max-height:560px;border:1px solid var(--border);border-radius:8px">
+    <div style="font-size:10px;color:var(--text3);margin-bottom:8px;padding:6px 10px;background:var(--bg3);border-radius:6px">
+      Format CSV: col1=Item code, coloane W01...W56=cantitate buc. Prima linie=header.
+    </div>
+    <div class="frow" style="margin-bottom:6px">
+      <div class="fchip on" id="dem-tab-item" onclick="setDemTab('item')">Per item</div>
+      <div class="fchip" id="dem-tab-line" onclick="setDemTab('line')">Per linie (ore)</div>
+      <span style="font-size:10px;color:var(--text2);margin-left:8px">Săptămâni:</span>
+      <select id="dem-wrange" onchange="renderDemTable()" style="background:var(--bg3);border:1px solid var(--border);border-radius:5px;color:var(--text);font-size:10px;padding:2px 6px">
+        <option value="20">W01–W20</option>
+        <option value="36">W01–W36</option>
+        <option value="56">W01–W56 (toate)</option>
+      </select>
+      <span style="font-size:10px;color:var(--text3)" id="dem-info"></span>
+    </div>
+    <div id="dem-msg" style="display:none;padding:6px 10px;border-radius:6px;font-size:11px;margin-bottom:8px"></div>
+    <div style="overflow:auto;max-height:520px;border:1px solid var(--border);border-radius:8px">
       <table id="dem-tbl" style="border-collapse:collapse;white-space:nowrap"></table>
     </div>
   </div>
