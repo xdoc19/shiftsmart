@@ -451,6 +451,85 @@ section('10. Date tooltip hover bar');
   });
 }
 
+// ── SUITE 11: setDefLine — realocă tot demandul ───────────────────────────
+section('11. setDefLine — realocă demand pe noua linie (toate săptămânile)');
+
+{
+  const ctx = makeCtx();
+  ctx.lines = [
+    { id:0, code:'L01', active:true, maxSch:3, ops:2, sat:false },
+    { id:1, code:'L02', active:true, maxSch:3, ops:2, sat:false }
+  ];
+  ctx.items = [
+    { id:0, code:'ITEM-A', rr:{0:100, 1:50}, defLine:0 },
+    { id:1, code:'ITEM-B', rr:{0:0,   1:80}, defLine:1 }
+  ];
+  ctx.demand = [
+    [500, 300, 0], // ITEM-A: W0=500, W1=300
+    [0,   200, 0]  // ITEM-B: W1=200
+  ];
+  ctx.WEEKS = 3;
+  ctx.cfg = { s1:8, s2:8, s3:8, mth:3, fri:2, win:2 };
+  ctx.updateKPIs = () => {};
+  ctx.renderDash = () => {};
+  ctx.renderCap = () => {};
+  ctx.renderHmap = () => {};
+  ctx.renderOrd = () => {};
+  ctx.renderOpsGap = () => {};
+  ctx.updateKPIs2 = () => {};
+  ctx.renderDash2 = () => {};
+  ctx.renderItemsTable = () => {};
+  ctx.sch2 = null;
+
+  // Inițializăm planificarea
+  ctx.runOptimizerLogic();
+
+  // Verificăm starea inițială
+  test('Înainte de schimbare: ITEM-A e pe L01 în toate săptămânile', () => {
+    const als = ctx.sch.al.filter(a => a.ii === 0);
+    assert.ok(als.length > 0, 'Nicio alocare pentru ITEM-A');
+    als.forEach(a => assert.strictEqual(a.li, 0, `ITEM-A alocat pe ${a.li}, expected 0`));
+  });
+
+  // Schimbăm defLine de la L01 la L02
+  ctx.setDefLine(0, 1);
+
+  test('După setDefLine(0→L02): toate alocările ITEM-A sunt pe L02', () => {
+    const als = ctx.sch.al.filter(a => a.ii === 0);
+    assert.ok(als.length > 0, 'Nicio alocare pentru ITEM-A după schimbare');
+    als.forEach(a => assert.strictEqual(a.li, 1, `ITEM-A rămas pe linia ${a.li}, expected 1`));
+  });
+
+  test('Orele recalculate cu noul rr (L02=50): 500/50=10h, 300/50=6h', () => {
+    const als = ctx.sch.al.filter(a => a.ii === 0);
+    const w0 = als.find(a => a.w === 0);
+    const w1 = als.find(a => a.w === 1);
+    assert.ok(w0, 'Nicio alocare W0');
+    assert.ok(w1, 'Nicio alocare W1');
+    assert.strictEqual(w0.hrs, 10, `W0 hrs: expected 10, got ${w0.hrs}`);
+    assert.strictEqual(w1.hrs,  6, `W1 hrs: expected 6, got ${w1.hrs}`);
+  });
+
+  test('ll[L01] eliberat complet pentru ITEM-A', () => {
+    // L01 nu mai are ore din ITEM-A
+    const ll = ctx.sch.ll;
+    // ITEM-B nu e pe L01, deci L01 ar trebui să fie 0 în W0 și W1
+    assert.strictEqual(ll[0][0], 0, `ll[L01][W0]=${ll[0][0]}, expected 0`);
+    assert.strictEqual(ll[0][1], 0, `ll[L01][W1]=${ll[0][1]}, expected 0`);
+  });
+
+  test('ll[L02] acumulează orele mutate + ITEM-B existent', () => {
+    const ll = ctx.sch.ll;
+    // W0: ITEM-A(10h), W1: ITEM-A(6h) + ITEM-B(200/80=2.5h)
+    assert.strictEqual(ll[1][0], 10);
+    assert.ok(Math.abs(ll[1][1] - (6 + 200/80)) < 0.001, `ll[L02][W1]=${ll[1][1]}, expected ${6+200/80}`);
+  });
+
+  test('items[0].defLine actualizat la 1', () => {
+    assert.strictEqual(ctx.items[0].defLine, 1);
+  });
+}
+
 // ── SUMAR ──────────────────────────────────────────────────────────────────
 console.log(`\n${'─'.repeat(50)}`);
 console.log(`Rezultat: ${passed} trecute, ${failed} eșuate din ${passed+failed} total`);
