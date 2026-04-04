@@ -736,20 +736,17 @@ function renderItemsTable(){
     for(var j=0;j<actL.length;j++){
       if(typeof item.rr[actL[j].id]==='undefined') item.rr[actL[j].id]=0;
     }
-    var compatL=actL.filter(function(l){return (item.rr[l.id]||0)>0;});
     var opts='<option value="-1">auto</option>';
-    for(var j=0;j<compatL.length;j++){
-      var sel=(compatL[j].id===defLi)?'selected':'';
-      opts+='<option value="'+compatL[j].id+'" '+sel+'>'+compatL[j].code+' '+item.rr[compatL[j].id]+'b/h</option>';
+    for(var j=0;j<actL.length;j++){
+      var sel=(actL[j].id===defLi)?'selected':'';
+      var rr=item.rr[actL[j].id]||0;
+      var rrTxt=rr>0?' '+rr+'b/h':'';
+      opts+='<option value="'+actL[j].id+'" '+sel+'>'+actL[j].code+rrTxt+'</option>';
     }
     tbody+='<tr>';
     tbody+='<td class="mn" style="position:sticky;left:0;background:var(--bg2);z-index:1;border-bottom:1px solid var(--border)">'+item.code+'</td>';
     tbody+='<td style="background:var(--blue-bg);padding:2px 5px">';
-    if(compatL.length===0){
-      tbody+='<span style="font-size:10px;color:var(--text3)">Seteaza run rate</span>';
-    } else {
-      tbody+='<select style="background:var(--bg3);border:1px solid var(--blue-d);border-radius:4px;color:var(--blue);font-size:10px;padding:2px 4px;width:120px" onchange="setDefLine('+ii+',+this.value)">'+opts+'</select>';
-    }
+    tbody+='<select style="background:var(--bg3);border:1px solid var(--blue-d);border-radius:4px;color:var(--blue);font-size:10px;padding:2px 4px;width:120px" onchange="setDefLine('+ii+',+this.value)">'+opts+'</select>';
     tbody+='</td>';
     for(var j=0;j<actL.length;j++){
       var li=actL[j].id;
