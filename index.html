@@ -221,12 +221,17 @@ tr:hover td{background:var(--bg3)}
 
   <!-- ITEMS & RUN RATES -->
   <div class="view" id="view-items">
-    <div class="frow" style="margin-bottom:10px">
+    <div class="frow" style="margin-bottom:8px">
       <button class="btn-add" onclick="addItem()">+ Item nou</button>
       <button class="btn-save" onclick="saveAndRun()">✓ Salvează & Recalculează</button>
       <span style="font-size:10px;color:var(--text2)">Run rate (buc/oră) per item per linie. 0 = incompatibil</span>
     </div>
-    <div style="overflow:auto;max-height:600px;border:1px solid var(--border);border-radius:8px">
+    <div class="frow" style="margin-bottom:8px;align-items:center;gap:8px">
+      <input id="item-filter" class="fi" placeholder="Caută item..." oninput="renderItemsTable()" style="width:160px;padding:4px 8px">
+      <span style="font-size:10px;color:var(--text3)">Linie:</span>
+      <div id="line-filter-chips" style="display:flex;gap:4px;flex-wrap:wrap"></div>
+    </div>
+    <div style="overflow:auto;max-height:560px;border:1px solid var(--border);border-radius:8px">
       <table id="items-tbl" style="border-collapse:collapse;white-space:nowrap"></table>
     </div>
   </div>
@@ -720,18 +725,40 @@ function saveAndRun(){
   nav('dash',document.querySelector('.ni'));
 }
 
+var itemLineFilter=-1; // -1 = toate liniile
+function renderLineFilterChips(){
+  var actL=lines.filter(function(l){return l.active;});
+  var el=document.getElementById('line-filter-chips');
+  if(!el) return;
+  var out='<span class="fchip'+(itemLineFilter===-1?' on':'')+'" onclick="itemLineFilter=-1;renderLineFilterChips();renderItemsTable()">Toate</span>';
+  for(var i=0;i<actL.length;i++){
+    var sel=(itemLineFilter===actL[i].id);
+    out+='<span class="fchip'+(sel?' on':'')+'" onclick="itemLineFilter='+actL[i].id+';renderLineFilterChips();renderItemsTable()">'+actL[i].code+'</span>';
+  }
+  el.innerHTML=out;
+}
 function renderItemsTable(){
   var actL=lines.filter(function(l){return l.active;});
+  // init chips on first call
+  var chipsEl=document.getElementById('line-filter-chips');
+  if(chipsEl && chipsEl.innerHTML==='') renderLineFilterChips();
+  // apply item text filter
+  var q=(document.getElementById('item-filter')||{}).value||'';
+  q=q.trim().toLowerCase();
+  // apply line filter — show only selected line column
+  var visL=(itemLineFilter===-1)?actL:actL.filter(function(l){return l.id===itemLineFilter;});
   var thead='<thead><tr>';
   thead+='<th style="position:sticky;left:0;z-index:3;background:var(--bg3)">Item</th>';
   thead+='<th style="background:var(--blue-bg);color:var(--blue);white-space:nowrap">Linie default</th>';
-  for(var i=0;i<actL.length;i++){
-    thead+='<th style="text-align:center;min-width:54px">'+actL[i].code+'<br><span style="font-size:8px;color:var(--text3)">b/h</span></th>';
+  for(var i=0;i<visL.length;i++){
+    thead+='<th style="text-align:center;min-width:54px">'+visL[i].code+'<br><span style="font-size:8px;color:var(--text3)">b/h</span></th>';
   }
   thead+='</tr></thead>';
   var tbody='<tbody>';
   for(var ii=0;ii<items.length;ii++){
     var item=items[ii];
+    // item text filter
+    if(q && item.code.toLowerCase().indexOf(q)===-1) continue;
     var defLi=(typeof item.defLine!=='undefined')?item.defLine:-1;
     for(var j=0;j<actL.length;j++){
       if(typeof item.rr[actL[j].id]==='undefined') item.rr[actL[j].id]=0;
@@ -748,8 +775,8 @@ function renderItemsTable(){
     tbody+='<td style="background:var(--blue-bg);padding:2px 5px">';
     tbody+='<select style="background:var(--bg3);border:1px solid var(--blue-d);border-radius:4px;color:var(--blue);font-size:10px;padding:2px 4px;width:120px" onchange="setDefLine('+ii+',+this.value)">'+opts+'</select>';
     tbody+='</td>';
-    for(var j=0;j<actL.length;j++){
-      var li=actL[j].id;
+    for(var j=0;j<visL.length;j++){
+      var li=visL[j].id;
       var v=item.rr[li]||0;
       var isDef=(li===defLi);
       tbody+='<td style="text-align:center;padding:1px 2px;background:'+(isDef?'#0A1A3A':'')+'">';
