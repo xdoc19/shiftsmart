@@ -810,7 +810,23 @@ function toggleLine(li){
   renderLinesTable();
 }
 
+function readLinesForm(){
+  var rows=document.querySelectorAll('#lines-body tr');
+  for(var i=0;i<rows.length&&i<lines.length;i++){
+    var r=rows[i];
+    var nameEl=r.cells[1]&&r.cells[1].querySelector('input');
+    if(nameEl) lines[i].name=nameEl.value;
+    var capEl=r.cells[2]; // read-only, skip
+    var maxEl=r.cells[3]&&r.cells[3].querySelector('select');
+    if(maxEl) lines[i].maxSch=+maxEl.value;
+    var opsEl=r.cells[4]&&r.cells[4].querySelector('input[type="number"]');
+    if(opsEl) lines[i].ops=+opsEl.value;
+    var satEl=r.cells[5]&&r.cells[5].querySelector('input[type="checkbox"]');
+    if(satEl) lines[i].sat=satEl.checked;
+  }
+}
 function saveAndRun(){
+  readLinesForm();
   runOptimizerLogic();
   nav('dash',document.querySelector('.ni'));
 }
