@@ -497,6 +497,7 @@ function runOptimizerLogic(){
   }
 
   sch={ll:ll,al:al};
+  confirmedMoves={};
   updateKPIs();
   renderDash();
   renderCap();
@@ -568,7 +569,8 @@ function buildBarHtml(li, w, used, cap, schObj, compact){
     var satTag=l.sat?'<span style="font-size:9px;color:var(--teal);margin-left:4px">[Sâm]</span>':'';
     h+='<div style="display:flex;justify-content:space-between;font-size:11px;margin-bottom:3px">';
     h+='<span style="font-weight:600;color:var(--text)">'+l.code+' '+satTag+'</span>';
-    h+='<span style="display:flex;align-items:center;gap:5px;color:var(--text2)">'+pct+'% · '+used.toFixed(1)+'h · ops/sch:'+l.ops+' <span class="bdg '+badgeCl+'">'+shift+'</span>'+(movedCnt>0?'<span class="bdg bmv" title="'+movedCnt+' comenzi mutate din săpt. viitoare">↑'+movedCnt+'</span>':'')+'</span>';
+    var isConf0=confirmedMoves[li+'_'+w];
+    h+='<span style="display:flex;align-items:center;gap:5px;color:var(--text2)">'+pct+'% · '+used.toFixed(1)+'h · ops/sch:'+l.ops+' <span class="bdg '+badgeCl+'">'+shift+'</span>'+(movedCnt>0?'<span class="bdg '+(isConf0?'bmv':'bs2')+'" title="'+movedCnt+' comenzi trase înainte — stoc '+(isConf0?'confirmat':'neconfirmat')+'">↑'+movedCnt+(isConf0?' ✓':' ⚠')+'</span>':'')+'</span>';
     h+='</div>';
   } else {
     var l=lines[li];
@@ -582,10 +584,12 @@ function buildBarHtml(li, w, used, cap, schObj, compact){
   if(p2>0) h+='<div style="position:absolute;left:'+p1+'%;top:0;height:100%;width:'+p2+'%;background:#854F0B"></div>';
   if(p3>0) h+='<div style="position:absolute;left:'+(p1+p2)+'%;top:0;height:100%;width:'+p3+'%;background:#7A1A1A"></div>';
   if(movedCnt>0){
-    // bandă violet pe bara care arată cantitatea mutată
     var movedH=movedHere.reduce(function(s,a){return s+a.hrs;},0);
     var mp=Math.min(Math.round(movedH/cap*100),100);
-    if(mp>0) h+='<div style="position:absolute;right:0;top:0;height:100%;width:'+mp+'%;background:rgba(155,127,255,0.35);border-left:2px solid var(--purple)"></div>';
+    var isConf=confirmedMoves[li+'_'+w];
+    var movColor=isConf?'rgba(155,127,255,0.35)':'rgba(245,166,35,0.35)';
+    var movBorder=isConf?'var(--purple)':'var(--amber)';
+    if(mp>0) h+='<div style="position:absolute;right:0;top:0;height:100%;width:'+mp+'%;background:'+movColor+';border-left:2px solid '+movBorder+'"></div>';
   }
   h+='</div></div>';
   return h;
@@ -594,23 +598,43 @@ function buildBarHtml(li, w, used, cap, schObj, compact){
 function showBarTip(li, w, schRef, e){
   var al=schRef.al.filter(function(a){return a.li===li&&a.w===w;});
   if(!al.length) return;
+  var tip=document.getElementById('bar-tip');
   var hd=document.getElementById('tip-hd');
   var body=document.getElementById('tip-body');
   var tot=document.getElementById('tip-tot');
-  var tip=document.getElementById('bar-tip');
-  hd.textContent=lines[li].code+' · W'+String(w+1).padStart(2,'0');
-  al.sort(function(a,b){return b.qty-a.qty;});
+  var confirmed=confirmedMoves[li+'_'+w];
+  var movedHere=al.filter(function(a){return a.moved;});
+  var confTag=movedHere.length>0
+    ?(confirmed
+        ?'<span style="background:#0A2018;color:var(--green);font-size:9px;padding:1px 5px;border-radius:4px;margin-left:6px">✓ Stoc confirmat</span>'
+        :'<span style="background:#281800;color:var(--amber);font-size:9px;padding:1px 5px;border-radius:4px;margin-left:6px">⚠ Stoc neconfirmat</span>')
+    :'';
+  hd.innerHTML=lines[li].code+' · W'+String(w+1).padStart(2,'0')+confTag;
+
+  // grupare pe schimburi
+  var shifts=['Sch1','Sch2','Sch3'];
+  var shiftLabels={'Sch1':'Sch1 07–15','Sch2':'Sch2 15–23','Sch3':'Sch3 23–07'};
+  var shiftColors={'Sch1':'var(--blue)','Sch2':'var(--amber)','Sch3':'var(--red)'};
   var rows='', totalQty=0, totalH=0;
-  var show=al.slice(0,10);
-  for(var i=0;i<show.length;i++){
-    var a=show[i];
-    totalQty+=a.qty; totalH+=a.hrs;
-    var movedTag=a.moved?'<span style="color:var(--purple);font-size:9px;margin-left:3px" title="Mutat din W'+String(a.origW+1).padStart(2,'0')+'">↑W'+String(a.origW+1).padStart(2,'0')+'</span>':'';
-    rows+='<div class="tip-row"><span>'+items[a.ii].code+movedTag+'</span><span>'+a.qty+' buc · '+a.hrs.toFixed(1)+'h</span></div>';
+  for(var si=0;si<shifts.length;si++){
+    var sh=shifts[si];
+    var grp=al.filter(function(a){return a.shift===sh;});
+    if(!grp.length) continue;
+    grp.sort(function(a,b){return b.qty-a.qty;});
+    rows+='<div style="font-size:9px;font-weight:700;color:'+shiftColors[sh]+';text-transform:uppercase;letter-spacing:.4px;padding:5px 0 2px;border-top:1px solid var(--border)">'+shiftLabels[sh]+'</div>';
+    var show=grp.slice(0,8);
+    for(var i=0;i<show.length;i++){
+      var a=show[i];
+      totalQty+=a.qty; totalH+=a.hrs;
+      var movedTag=a.moved
+        ?'<span style="color:'+(confirmed?'var(--green)':'var(--amber)')+';font-size:9px;margin-left:3px">↑W'+String(a.origW+1).padStart(2,'0')+'</span>'
+        :'';
+      rows+='<div class="tip-row"><span>'+items[a.ii].code+movedTag+'</span><span>'+a.qty+' buc · '+a.hrs.toFixed(1)+'h</span></div>';
+    }
+    if(grp.length>8) rows+='<div style="color:var(--text3);font-size:9px;padding:1px 0">+ '+(grp.length-8)+' altele</div>';
   }
-  if(al.length>10) rows+='<div style="color:var(--text3);font-size:10px;padding-top:2px">+ '+(al.length-10)+' altele</div>';
   body.innerHTML=rows;
-  tot.innerHTML='<span>TOTAL</span><span>'+totalQty+' buc · '+totalH.toFixed(1)+'h</span>';
+  tot.innerHTML='<span>TOTAL</span><span>'+totalQty+' buc · '+totalH.toFixed(2)+'h</span>';
   tip.style.display='block';
   moveTip(e);
 }
@@ -672,18 +696,22 @@ function renderIssues(){
   var out='';
 
   if(movedList.length>0){
-    out+='<div style="font-size:9px;font-weight:700;color:var(--purple);text-transform:uppercase;letter-spacing:.5px;padding:6px 0 3px">↑ Comenzi trase înainte</div>';
-    var showM=movedList.slice(0,5);
+    var unconfCnt=movedList.filter(function(m){return !confirmedMoves[m.li+'_'+m.w];}).length;
+    out+='<div style="font-size:9px;font-weight:700;color:'+(unconfCnt>0?'var(--amber)':'var(--green)')+';text-transform:uppercase;letter-spacing:.5px;padding:6px 0 3px">↑ Comenzi trase înainte'+(unconfCnt>0?' — '+unconfCnt+' neconfirmate':'  ✓')+'</div>';
+    var showM=movedList.slice(0,8);
     for(var i=0;i<showM.length;i++){
       var m=showM[i];
-      out+='<div style="display:flex;align-items:center;gap:8px;padding:4px 0;border-bottom:1px solid var(--border);font-size:11px">';
-      out+='<span class="bdg bmv">↑ Mutat</span>';
+      var key=m.li+'_'+m.w;
+      var conf=confirmedMoves[key];
+      out+='<div style="display:flex;align-items:center;gap:6px;padding:4px 0;border-bottom:1px solid var(--border);font-size:11px">';
+      out+='<span class="bdg bmv">↑</span>';
       out+='<span style="color:var(--text2)">'+lines[m.li].code+'</span>';
-      out+='<span style="color:var(--text3)">→ W'+String(m.w+1).padStart(2,'0')+'</span>';
-      out+='<span style="margin-left:auto;font-family:monospace;color:var(--purple)">'+m.cnt+' cmd · '+m.qty+' buc</span>';
+      out+='<span style="color:var(--text3)">W'+String(m.w+1).padStart(2,'0')+'</span>';
+      out+='<span style="font-family:monospace;font-size:10px;color:var(--text3)">'+m.cnt+' cmd/'+m.qty+'buc</span>';
+      out+='<button onclick="toggleConfirmMove(\''+key+'\')" style="margin-left:auto;border:1px solid '+(conf?'var(--green-d)':'var(--amber-d)')+';background:'+(conf?'var(--green-bg)':'var(--amber-bg)')+';color:'+(conf?'var(--green)':'var(--amber)')+';border-radius:5px;padding:2px 8px;cursor:pointer;font-size:10px;white-space:nowrap">'+(conf?'✓ Stoc OK':'⚠ Confirmă stoc')+'</button>';
       out+='</div>';
     }
-    if(movedList.length>5) out+='<div style="color:var(--text3);font-size:10px;padding:3px 0">+ '+(movedList.length-5)+' altele...</div>';
+    if(movedList.length>8) out+='<div style="color:var(--text3);font-size:10px;padding:3px 0">+ '+(movedList.length-8)+' altele...</div>';
     out+='<div style="height:6px"></div>';
   }
 
@@ -706,6 +734,11 @@ function renderIssues(){
     if(issues.length>6) out+='<div style="color:var(--text3);font-size:10px;padding:3px 0">+ '+(issues.length-6)+' altele...</div>';
   }
   el.innerHTML=out;
+}
+
+function toggleConfirmMove(key){
+  confirmedMoves[key]=!confirmedMoves[key];
+  renderDash();
 }
 
 function renderDash(){ renderLinesChart(); renderIssues(); }
@@ -1111,6 +1144,8 @@ function runOpt(){
 
 // ===== DASHBOARD 2 — primele 3 săptămâni =====
 var sch2=null;
+// confirmare stoc pentru comenzile mutate înainte — cheie: "li_w"
+var confirmedMoves={};
 var W3=3;
 
 function runOptimizerLogic3W(){
