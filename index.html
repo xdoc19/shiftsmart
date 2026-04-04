@@ -108,6 +108,7 @@ tr:hover td{background:var(--bg3)}
 <div id="sb">
   <div class="ns">Planning</div>
   <div class="ni on" onclick="nav('dash',this)">▪ Dashboard</div>
+  <div class="ni" onclick="nav('dash2',this)">▪ Dashboard 3 săpt.</div>
   <div class="ni" onclick="nav('cap',this)">▬ Capacitate <span class="nb nb-a" id="nb-o">0</span></div>
   <div class="ni" onclick="nav('hmap',this)">▦ Heatmap 56 săpt.</div>
   <div class="ni" onclick="nav('ord',this)">▶ Alocări <span class="nb nb-r" id="nb-n">0</span></div>
@@ -155,6 +156,33 @@ tr:hover td{background:var(--bg3)}
       <div id="lchrt"></div>
     </div>
     <div class="card"><div class="ct">Probleme detectate</div><div id="issues"></div></div>
+  </div>
+
+  <!-- DASHBOARD 2 — 3 weeks -->
+  <div class="view" id="view-dash2">
+    <div style="display:flex;align-items:center;gap:10px;margin-bottom:10px">
+      <div class="kgrid" style="flex:1;margin-bottom:0" id="d2-kgrid">
+        <div class="kc"><div class="kl">Sch3 noapte</div><div class="kv bad" id="d2-kpi-n">—</div><div class="ks">W1–W3</div></div>
+        <div class="kc"><div class="kl">Utilizare medie</div><div class="kv warn" id="d2-kpi-u">—</div><div class="ks">W1–W3</div></div>
+        <div class="kc"><div class="kl">Linii supraîncărcate</div><div class="kv bad" id="d2-kpi-o">—</div><div class="ks">W1–W3</div></div>
+        <div class="kc"><div class="kl">Ore rămase</div><div class="kv ok" id="d2-kpi-r">—</div><div class="ks">capacitate neutilizată</div></div>
+      </div>
+      <button class="rbtn" onclick="runOpt2()" id="rbtn2" style="white-space:nowrap;height:fit-content">▶ Optimizează W1–W3</button>
+    </div>
+    <div style="display:grid;grid-template-columns:1fr 1fr 1fr;gap:10px;height:calc(100vh - 200px)">
+      <div class="card" style="overflow-y:auto;margin-bottom:0">
+        <div class="ct" style="color:var(--blue)">Săptămâna 1</div>
+        <div id="d2-w0"></div>
+      </div>
+      <div class="card" style="overflow-y:auto;margin-bottom:0">
+        <div class="ct" style="color:var(--blue)">Săptămâna 2</div>
+        <div id="d2-w1"></div>
+      </div>
+      <div class="card" style="overflow-y:auto;margin-bottom:0">
+        <div class="ct" style="color:var(--blue)">Săptămâna 3</div>
+        <div id="d2-w2"></div>
+      </div>
+    </div>
   </div>
 
   <!-- CAPACITY -->
@@ -928,6 +956,7 @@ function nav(view, el){
   if(view==='dem') renderDemTable();
   if(view==='cfg') saveCfg();
   if(view==='cap') renderCap();
+  if(view==='dash2'){if(sch2)renderDash2();}
   if(view==='hmap') renderHmap();
   if(view==='ord') renderOrd();
 }
@@ -955,6 +984,121 @@ function runOpt(){
     runOptimizerLogic();
     btn.disabled=false; btn.textContent='✓ Re-optimizează';
   },300);
+}
+
+// ===== DASHBOARD 2 — primele 3 săptămâni =====
+var sch2=null;
+var W3=3;
+
+function runOptimizerLogic3W(){
+  var base=buildBase();
+  var ll=base.ll.map(function(r){return r.slice();});
+  var al=base.al.map(function(a){return Object.assign({},a);});
+  // keep only allocations in W1-W3
+  al=al.filter(function(a){return a.w<W3;});
+  var win=Math.min(cfg.win,W3-1);
+
+  for(var i=0;i<al.length;i++){
+    var a=al[i];
+    if(ll[a.li][a.w]<=getLineCapTwoShift(a.li)) continue;
+    var item=items[a.ii];
+    for(var li2=0;li2<lines.length;li2++){
+      if(li2===a.li||!lines[li2].active||!item.rr[li2]) continue;
+      var hrs2=a.qty/item.rr[li2];
+      if(ll[li2][a.w]+hrs2<=getLineCapTwoShift(li2)){
+        ll[a.li][a.w]-=a.hrs; a.rr=item.rr[li2]; a.hrs=hrs2; a.li=li2; a.moved=true;
+        ll[li2][a.w]+=hrs2; break;
+      }
+    }
+  }
+  for(var i=0;i<al.length;i++){
+    var a=al[i];
+    if(ll[a.li][a.w]<=getLineCapTwoShift(a.li)){a.shift=shiftLabel(ll[a.li][a.w],a.li);continue;}
+    var moved=false;
+    for(var dw=1;dw<=win&&!moved;dw++){
+      for(var s=0;s<2&&!moved;s++){
+        var nw=a.w+[-1,1][s]*dw;
+        if(nw<0||nw>=W3) continue;
+        if(ll[a.li][nw]+a.hrs<=getLineCapTwoShift(a.li)){
+          ll[a.li][a.w]-=a.hrs; ll[a.li][nw]+=a.hrs; a.w=nw; a.moved=true; moved=true;
+        }
+      }
+    }
+    a.shift=shiftLabel(ll[a.li][a.w],a.li);
+    a.over=ll[a.li][a.w]>getLineCap(a.li);
+  }
+  sch2={ll:ll,al:al};
+  updateKPIs2();
+  renderDash2();
+}
+
+function runOpt2(){
+  var btn=document.getElementById('rbtn2');
+  btn.disabled=true; btn.textContent='⏳...';
+  setTimeout(function(){
+    runOptimizerLogic3W();
+    btn.disabled=false; btn.textContent='✓ Re-optimizează W1–W3';
+  },300);
+}
+
+function updateKPIs2(){
+  if(!sch2) return;
+  var ll=sch2.ll, al=sch2.al;
+  var nightCnt=0, overSet={}, util=0, ucnt=0, remH=0;
+  al.forEach(function(a){if(a.shift==='Sch3') nightCnt++;});
+  for(var li=0;li<lines.length;li++){
+    if(!lines[li].active) continue;
+    var cap=getLineCap(li);
+    if(cap<=0) continue;
+    for(var w=0;w<W3;w++){
+      if(ll[li][w]>cap) overSet[li]=true;
+      if(ll[li][w]>0){util+=ll[li][w]/cap*100;ucnt++;}
+      remH+=Math.max(0,cap-ll[li][w]);
+    }
+  }
+  var avgU=ucnt>0?Math.round(util/ucnt):0;
+  var overCnt=Object.keys(overSet).length;
+  function se(id,v,c){var e=document.getElementById(id);if(e){e.textContent=v;e.className='kv '+c;}}
+  se('d2-kpi-n',nightCnt,nightCnt===0?'ok':nightCnt<3?'warn':'bad');
+  se('d2-kpi-u',avgU+'%',avgU>=70&&avgU<=90?'ok':'warn');
+  se('d2-kpi-o',overCnt,overCnt===0?'ok':'bad');
+  se('d2-kpi-r',Math.round(remH)+'h','ok');
+}
+
+function renderWeekCol(w){
+  if(!sch2) return '<div style="color:var(--text3);font-size:11px;padding:10px">Apasă Optimizează W1–W3</div>';
+  var ll=sch2.ll, out='';
+  for(var li=0;li<lines.length;li++){
+    var l=lines[li];
+    if(!l.active) continue;
+    var used=ll[li][w], cap=getLineCap(li);
+    if(cap<=0) continue;
+    var pct=Math.round(used/cap*100);
+    var cap1=getLineCapDay(li), cap2=getLineCapTwoShift(li);
+    var p1=Math.min(Math.round(Math.min(used,cap1)/cap*100),100);
+    var p2=used>cap1?Math.min(Math.round((Math.min(used,cap2)-cap1)/cap*100),100-p1):0;
+    var p3=used>cap2?Math.min(Math.round((Math.min(used,cap)-cap2)/cap*100),100-p1-p2):0;
+    var shift=shiftLabel(used,li);
+    var badgeCl=shift==='Sch3'?'ber':shift==='Sch2'?'bwn':'bok';
+    out+='<div style="margin-bottom:7px">';
+    out+='<div style="display:flex;justify-content:space-between;font-size:10px;margin-bottom:2px">';
+    out+='<span style="font-weight:600;color:var(--text)">'+l.code+'</span>';
+    out+='<span style="color:var(--text2)">'+pct+'% <span class="bdg '+badgeCl+'">'+shift+'</span></span>';
+    out+='</div>';
+    out+='<div class="bar-tr" style="height:14px">';
+    if(p1>0) out+='<div style="position:absolute;left:0;top:0;height:100%;width:'+p1+'%;background:#185FA5"></div>';
+    if(p2>0) out+='<div style="position:absolute;left:'+p1+'%;top:0;height:100%;width:'+p2+'%;background:#854F0B"></div>';
+    if(p3>0) out+='<div style="position:absolute;left:'+(p1+p2)+'%;top:0;height:100%;width:'+p3+'%;background:#7A1A1A"></div>';
+    out+='</div></div>';
+  }
+  return out||'<div style="color:var(--text3);font-size:11px">Nicio linie activă</div>';
+}
+
+function renderDash2(){
+  for(var w=0;w<W3;w++){
+    var el=document.getElementById('d2-w'+w);
+    if(el) el.innerHTML=renderWeekCol(w);
+  }
 }
 
 // ===== INIT =====
