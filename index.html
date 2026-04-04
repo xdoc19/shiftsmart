@@ -474,24 +474,7 @@ function runOptimizerLogic(){
   var al = base.al.map(function(a){return Object.assign({},a);});
   var win = cfg.win;
 
-  // Step 1: move to alt compatible lines
-  for(var i=0;i<al.length;i++){
-    var a=al[i];
-    if(ll[a.li][a.w]<=getLineCapTwoShift(a.li)) continue;
-    var item=items[a.ii];
-    for(var li2=0;li2<lines.length;li2++){
-      if(li2===a.li||!lines[li2].active||!item.rr[li2]) continue;
-      var hrs2=a.qty/item.rr[li2];
-      if(ll[li2][a.w]+hrs2<=getLineCapTwoShift(li2)){
-        ll[a.li][a.w]-=a.hrs;
-        a.rr=item.rr[li2]; a.hrs=hrs2; a.li=li2; a.moved=true;
-        ll[li2][a.w]+=hrs2;
-        break;
-      }
-    }
-  }
-
-  // Step 2: move to adjacent weeks
+  // Mutare doar în săptămâni adiacente (linia rămâne mereu defLine)
   for(var i=0;i<al.length;i++){
     var a=al[i];
     if(ll[a.li][a.w]<=getLineCapTwoShift(a.li)){
@@ -1093,19 +1076,6 @@ function runOptimizerLogic3W(){
   al=al.filter(function(a){return a.w<W3;});
   var win=Math.min(cfg.win,W3-1);
 
-  for(var i=0;i<al.length;i++){
-    var a=al[i];
-    if(ll[a.li][a.w]<=getLineCapTwoShift(a.li)) continue;
-    var item=items[a.ii];
-    for(var li2=0;li2<lines.length;li2++){
-      if(li2===a.li||!lines[li2].active||!item.rr[li2]) continue;
-      var hrs2=a.qty/item.rr[li2];
-      if(ll[li2][a.w]+hrs2<=getLineCapTwoShift(li2)){
-        ll[a.li][a.w]-=a.hrs; a.rr=item.rr[li2]; a.hrs=hrs2; a.li=li2; a.moved=true;
-        ll[li2][a.w]+=hrs2; break;
-      }
-    }
-  }
   for(var i=0;i<al.length;i++){
     var a=al[i];
     if(ll[a.li][a.w]<=getLineCapTwoShift(a.li)){a.shift=shiftLabel(ll[a.li][a.w],a.li);continue;}
