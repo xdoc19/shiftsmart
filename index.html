@@ -497,7 +497,12 @@ function runOptimizerLogic(){
   }
 
   sch={ll:ll,al:al};
-  confirmedMoves={};
+  // păstrează confirmările care mai sunt valide (aceeași linie + săpt. destinație)
+  var newConf={};
+  al.forEach(function(a){
+    if(a.moved){var k=a.li+'_'+a.w; if(confirmedMoves[k]) newConf[k]=true;}
+  });
+  confirmedMoves=newConf;
   updateKPIs();
   renderDash();
   renderCap();
