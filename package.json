@@ -1,0 +1,12 @@
+{
+  "name": "shiftsmart-tests",
+  "version": "1.0.0",
+  "scripts": {
+    "test:unit": "node tests/unit.test.js",
+    "test:e2e": "npx playwright test tests/e2e.spec.js",
+    "test": "node tests/unit.test.js && npx playwright test tests/e2e.spec.js"
+  },
+  "devDependencies": {
+    "@playwright/test": "^1.49.0"
+  }
+}
