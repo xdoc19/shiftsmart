@@ -784,7 +784,7 @@ function renderLinesTable(){
     for(var s=1;s<=3;s++) out+='<option value="'+s+'"'+(l.maxSch===s?' selected':'')+'>'+s+'</option>';
     out+='</select></td>';
     out+='<td><input type="number" class="fi-n" value="'+l.ops+'" min="1" max="30" onchange="lines['+li+'].ops=+this.value"></td>';
-    out+='<td><label style="cursor:pointer"><input type="checkbox" '+(l.sat?'checked':'')+' onchange="lines['+li+'].sat=this.checked;this.closest(\'tr\').cells[2].textContent=getLineCap('+li+')+'+'h\'" style="accent-color:var(--teal)"> <span style="font-size:10px;color:var(--teal)">'+(l.sat?'Da':'Nu')+'</span></label></td>';
+    out+='<td><label style="cursor:pointer"><input type="checkbox" '+(l.sat?'checked':'')+' onchange="lines['+li+'].sat=this.checked;this.closest(\'tr\').cells[2].textContent=getLineCap('+li+')+'+'h\';this.nextElementSibling.textContent=this.checked?\'Da\':\'Nu\'" style="accent-color:var(--teal)"> <span style="font-size:10px;color:var(--teal)">'+(l.sat?'Da':'Nu')+'</span></label></td>';
     out+='<td><span style="font-size:10px;color:'+(l.active?'var(--green)':'var(--red)')+'">'+( l.active?'Activ':'Inactiv')+'</span></td>';
     out+='<td><button class="btn-del" onclick="toggleLine('+li+')">'+( l.active?'✕ Dezactivează':'✓ Activează')+'</button></td>';
     out+='</tr>';
