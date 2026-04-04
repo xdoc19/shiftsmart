@@ -443,12 +443,14 @@ function buildBase(){
     for(var w=0;w<WEEKS;w++){
       var qty = demand[i][w];
       if(!qty) continue;
-      // use defLine if set and active, else fallback to highest run rate
       var best=-1,bRate=0;
       var def=items[i].defLine;
-      if(def>=0 && def<lines.length && lines[def].active && items[i].rr[def]>0){
-        best=def; bRate=items[i].rr[def];
+      if(def>=0 && def<lines.length && lines[def].active){
+        // defLine setat → folosim DOAR acea linie, indiferent de rr
+        if(items[i].rr[def]>0){ best=def; bRate=items[i].rr[def]; }
+        // rr=0 pe defLine → nu alocăm (nu facem fallback pe alte linii)
       } else {
+        // fără defLine → fallback la linia cu cel mai mare rr
         for(var li=0;li<lines.length;li++){
           if(lines[li].active && items[i].rr[li]>bRate){
             bRate=items[i].rr[li]; best=li;
@@ -875,8 +877,10 @@ function renderItemsTable(){
     }
     tbody+='<tr>';
     tbody+='<td class="mn" style="position:sticky;left:0;background:var(--bg2);z-index:1;border-bottom:1px solid var(--border)">'+item.code+'</td>';
+    var defRrOk=(defLi>=0 && (item.rr[defLi]||0)>0);
     tbody+='<td style="background:var(--blue-bg);padding:2px 5px">';
-    tbody+='<select style="background:var(--bg3);border:1px solid var(--blue-d);border-radius:4px;color:var(--blue);font-size:10px;padding:2px 4px;width:120px" onchange="setDefLine('+ii+',+this.value)">'+opts+'</select>';
+    tbody+='<select style="background:var(--bg3);border:1px solid '+(defLi>=0&&!defRrOk?'var(--red-d)':'var(--blue-d)')+';border-radius:4px;color:'+(defLi>=0&&!defRrOk?'var(--red)':'var(--blue)')+';font-size:10px;padding:2px 4px;width:120px" onchange="setDefLine('+ii+',+this.value)">'+opts+'</select>';
+    if(defLi>=0&&!defRrOk) tbody+='<span title="rr=0 pe această linie — producția nu va fi planificată!" style="color:var(--red);font-size:10px;margin-left:4px;cursor:help">⚠</span>';
     tbody+='</td>';
     for(var j=0;j<visL.length;j++){
       var li=visL[j].id;
