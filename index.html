@@ -343,7 +343,10 @@ for(var i=0;i<100;i++){
   var hasAny = false;
   for(var k in rr){ if(rr[k]>0){hasAny=true;break;} }
   if(!hasAny) rr[i%20] = 40;
-  items.push({id:i,code:fam+'-'+num,desc:fam+' type '+num,rr:rr});
+  // default line = first with highest run rate
+  var defL=-1,defR=0;
+  for(var k in rr){ if(rr[k]>defR){defR=rr[k];defL=+k;} }
+  items.push({id:i,code:fam+'-'+num,desc:fam+' type '+num,rr:rr,defLine:defL});
 }
 
 var demand = [];
@@ -396,11 +399,16 @@ function buildBase(){
     for(var w=0;w<WEEKS;w++){
       var qty = demand[i][w];
       if(!qty) continue;
-      // find best line (highest run rate)
+      // use defLine if set and active, else fallback to highest run rate
       var best=-1,bRate=0;
-      for(var li=0;li<lines.length;li++){
-        if(lines[li].active && items[i].rr[li]>bRate){
-          bRate=items[i].rr[li]; best=li;
+      var def=items[i].defLine;
+      if(def>=0 && def<lines.length && lines[def].active && items[i].rr[def]>0){
+        best=def; bRate=items[i].rr[def];
+      } else {
+        for(var li=0;li<lines.length;li++){
+          if(lines[li].active && items[i].rr[li]>bRate){
+            bRate=items[i].rr[li]; best=li;
+          }
         }
       }
       if(best<0) continue;
@@ -732,7 +740,7 @@ function addItem(){
   var fam=FAM[Math.floor(Math.random()*10)];
   var rr={};
   for(var li=0;li<lines.length;li++) rr[li]=0;
-  items.push({id:items.length,code:fam+'-NEW',desc:'Item nou',rr:rr});
+  items.push({id:items.length,code:fam+'-NEW',desc:'Item nou',rr:rr,defLine:-1});
   renderItemsTable();
 }
 
