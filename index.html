@@ -698,13 +698,16 @@ function renderLinesTable(){
 }
 
 function addLine(){
-  var n=lines.length+1;
-  var rr={};
-  for(var li=0;li<lines.length;li++) rr[li]=0;
-  lines.push({id:lines.length,code:'RW'+String(n).padStart(2,'0'),name:'Linie '+String(n).padStart(2,'0'),sat:false,maxSch:3,ops:2,active:true});
-  var newLi=lines.length-1;
-  for(var i=0;i<items.length;i++) items[i].rr[newLi]=0;
+  var newId=lines.length;
+  var n=newId+1;
+  lines.push({id:newId,code:'RW'+String(n).padStart(2,'0'),name:'Linie '+String(n).padStart(2,'0'),sat:false,maxSch:3,ops:2,active:true});
+  // extend rr for ALL items
+  for(var i=0;i<items.length;i++){
+    if(typeof items[i].rr[newId]==='undefined') items[i].rr[newId]=0;
+  }
   renderLinesTable();
+  // if items table is visible, re-render it too
+  if(document.getElementById('view-items').classList.contains('on')) renderItemsTable();
 }
 
 function toggleLine(li){
@@ -719,22 +722,55 @@ function saveAndRun(){
 
 function renderItemsTable(){
   var actL=lines.filter(function(l){return l.active;});
-  var thead='<thead><tr><th>Item</th><th>Descriere</th>';
-  for(var i=0;i<actL.length;i++) thead+='<th style="text-align:center">'+actL[i].code+'<br><span style="font-size:8px;color:var(--text3)">buc/h</span></th>';
+  var thead='<thead><tr>';
+  thead+='<th style="position:sticky;left:0;z-index:3;background:var(--bg3)">Item</th>';
+  thead+='<th style="background:var(--blue-bg);color:var(--blue);white-space:nowrap">Linie default</th>';
+  for(var i=0;i<actL.length;i++){
+    thead+='<th style="text-align:center;min-width:54px">'+actL[i].code+'<br><span style="font-size:8px;color:var(--text3)">b/h</span></th>';
+  }
   thead+='</tr></thead>';
   var tbody='<tbody>';
-  for(var i=0;i<items.length;i++){
-    tbody+='<tr><td class="mn">'+items[i].code+'</td><td style="font-size:10px;color:var(--text2)">'+items[i].desc+'</td>';
+  for(var ii=0;ii<items.length;ii++){
+    var item=items[ii];
+    var defLi=(typeof item.defLine!=='undefined')?item.defLine:-1;
+    for(var j=0;j<actL.length;j++){
+      if(typeof item.rr[actL[j].id]==='undefined') item.rr[actL[j].id]=0;
+    }
+    var compatL=actL.filter(function(l){return (item.rr[l.id]||0)>0;});
+    var opts='<option value="-1">auto</option>';
+    for(var j=0;j<compatL.length;j++){
+      var sel=(compatL[j].id===defLi)?'selected':'';
+      opts+='<option value="'+compatL[j].id+'" '+sel+'>'+compatL[j].code+' '+item.rr[compatL[j].id]+'b/h</option>';
+    }
+    tbody+='<tr>';
+    tbody+='<td class="mn" style="position:sticky;left:0;background:var(--bg2);z-index:1;border-bottom:1px solid var(--border)">'+item.code+'</td>';
+    tbody+='<td style="background:var(--blue-bg);padding:2px 5px">';
+    if(compatL.length===0){
+      tbody+='<span style="font-size:10px;color:var(--text3)">Seteaza run rate</span>';
+    } else {
+      tbody+='<select style="background:var(--bg3);border:1px solid var(--blue-d);border-radius:4px;color:var(--blue);font-size:10px;padding:2px 4px;width:120px" onchange="setDefLine('+ii+',+this.value)">'+opts+'</select>';
+    }
+    tbody+='</td>';
     for(var j=0;j<actL.length;j++){
       var li=actL[j].id;
-      var v=items[i].rr[li]||0;
-      tbody+='<td style="text-align:center"><input type="number" class="fi-n" value="'+v+'" min="0" onchange="items['+i+'].rr['+li+']=+this.value;this.style.background=this.value>0?\'#0A1A0A\':\'var(--bg3)\'" style="background:'+(v>0?'#0A1A0A':'var(--bg3)')+'"></td>';
+      var v=item.rr[li]||0;
+      var isDef=(li===defLi);
+      tbody+='<td style="text-align:center;padding:1px 2px;background:'+(isDef?'#0A1A3A':'')+'">';
+      tbody+='<input type="number" class="fi-n" value="'+v+'" min="0" ';
+      tbody+='onchange="items['+ii+'].rr['+li+']=+this.value;if(+this.value>0&&items['+ii+'].defLine<0)items['+ii+'].defLine='+li+';renderItemsTable()" ';
+      tbody+='style="background:'+(v>0?'#0A1A0A':'var(--bg3)')+(isDef?';border-color:var(--blue)':'')+'">';
+      if(isDef) tbody+='<div style="font-size:7px;color:var(--blue);line-height:1.2">default</div>';
+      tbody+='</td>';
     }
     tbody+='</tr>';
   }
   tbody+='</tbody>';
   var t=document.getElementById('items-tbl');
   if(t) t.innerHTML=thead+tbody;
+}
+function setDefLine(itemIdx,lineId){
+  items[itemIdx].defLine=lineId;
+  renderItemsTable();
 }
 
 function addItem(){
