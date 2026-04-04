@@ -801,6 +801,8 @@ function renderItemsTable(){
     var item=items[ii];
     // item text filter
     if(q && item.code.toLowerCase().indexOf(q)===-1) continue;
+    // line chip filter: show only items compatible with selected line (rr > 0)
+    if(itemLineFilter!==-1 && !(item.rr[itemLineFilter]>0)) continue;
     var defLi=(typeof item.defLine!=='undefined')?item.defLine:-1;
     if(defLineFilterVal===-2 && defLi!==-1) continue;
     if(defLineFilterVal>=0 && defLi!==defLineFilterVal) continue;
