@@ -230,6 +230,10 @@ tr:hover td{background:var(--bg3)}
       <input id="item-filter" class="fi" placeholder="Caută item..." oninput="renderItemsTable()" style="width:160px;padding:4px 8px">
       <span style="font-size:10px;color:var(--text3)">Linie:</span>
       <div id="line-filter-chips" style="display:flex;gap:4px;flex-wrap:wrap"></div>
+      <span style="font-size:10px;color:var(--text3);margin-left:8px">Default:</span>
+      <select id="defline-filter" style="background:var(--bg3);border:1px solid var(--border);border-radius:6px;color:var(--text);font-size:11px;padding:3px 6px" onchange="renderItemsTable()">
+        <option value="-1">Toate</option>
+      </select>
     </div>
     <div style="overflow:auto;max-height:560px;border:1px solid var(--border);border-radius:8px">
       <table id="items-tbl" style="border-collapse:collapse;white-space:nowrap"></table>
@@ -742,6 +746,16 @@ function renderItemsTable(){
   // init chips on first call
   var chipsEl=document.getElementById('line-filter-chips');
   if(chipsEl && chipsEl.innerHTML==='') renderLineFilterChips();
+  // populate defline dropdown
+  var dfSel=document.getElementById('defline-filter');
+  if(dfSel){
+    var curVal=dfSel.value;
+    var opts='<option value="-1">Toate</option><option value="-2">Nesetat (auto)</option>';
+    for(var i=0;i<actL.length;i++) opts+='<option value="'+actL[i].id+'">'+actL[i].code+'</option>';
+    dfSel.innerHTML=opts;
+    dfSel.value=curVal;
+  }
+  var defLineFilterVal=dfSel?+dfSel.value:-1;
   // apply item text filter
   var q=(document.getElementById('item-filter')||{}).value||'';
   q=q.trim().toLowerCase();
@@ -760,6 +774,8 @@ function renderItemsTable(){
     // item text filter
     if(q && item.code.toLowerCase().indexOf(q)===-1) continue;
     var defLi=(typeof item.defLine!=='undefined')?item.defLine:-1;
+    if(defLineFilterVal===-2 && defLi!==-1) continue;
+    if(defLineFilterVal>=0 && defLi!==defLineFilterVal) continue;
     for(var j=0;j<actL.length;j++){
       if(typeof item.rr[actL[j].id]==='undefined') item.rr[actL[j].id]=0;
     }
