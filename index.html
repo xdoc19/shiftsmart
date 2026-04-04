@@ -460,7 +460,7 @@ function buildBase(){
       if(best<0) continue;
       var hrs = qty/bRate;
       ll[best][w]+=hrs;
-      al.push({ii:i,w:w,li:best,qty:qty,rr:bRate,hrs:hrs,shift:'Sch1',moved:false,over:false});
+      al.push({ii:i,w:w,li:best,qty:qty,rr:bRate,hrs:hrs,shift:'Sch1',moved:false,over:false,origW:w});
     }
   }
   al.forEach(function(a){
@@ -476,7 +476,7 @@ function runOptimizerLogic(){
   var al = base.al.map(function(a){return Object.assign({},a);});
   var win = cfg.win;
 
-  // Mutare doar în săptămâni adiacente (linia rămâne mereu defLine)
+  // Mutare DOAR înapoi (în săptămâni anterioare) — niciodată în viitor
   for(var i=0;i<al.length;i++){
     var a=al[i];
     if(ll[a.li][a.w]<=getLineCapTwoShift(a.li)){
@@ -484,15 +484,12 @@ function runOptimizerLogic(){
     }
     var moved=false;
     for(var dw=1;dw<=win&&!moved;dw++){
-      var signs=[-1,1];
-      for(var s=0;s<2&&!moved;s++){
-        var nw=a.w+signs[s]*dw;
-        if(nw<0||nw>=WEEKS) continue;
-        if(ll[a.li][nw]+a.hrs<=getLineCapTwoShift(a.li)){
-          ll[a.li][a.w]-=a.hrs;
-          ll[a.li][nw]+=a.hrs;
-          a.w=nw; a.moved=true; moved=true;
-        }
+      var nw=a.w-dw; // doar înapoi
+      if(nw<0) continue;
+      if(ll[a.li][nw]+a.hrs<=getLineCapTwoShift(a.li)){
+        ll[a.li][a.w]-=a.hrs;
+        ll[a.li][nw]+=a.hrs;
+        a.w=nw; a.moved=true; moved=true;
       }
     }
     a.shift=shiftLabel(ll[a.li][a.w],a.li);
@@ -553,7 +550,7 @@ function colorForPct(p){
   return '#854F0B';
 }
 
-function buildBarHtml(li, w, used, cap, schRef, compact){
+function buildBarHtml(li, w, used, cap, schObj, compact){
   var cap1=getLineCapDay(li), cap2=getLineCapTwoShift(li);
   var pct=Math.round(used/cap*100);
   var p1=Math.min(Math.round(Math.min(used,cap1)/cap*100),100);
@@ -561,26 +558,35 @@ function buildBarHtml(li, w, used, cap, schRef, compact){
   var p3=used>cap2?Math.min(Math.round((Math.min(used,cap)-cap2)/cap*100),100-p1-p2):0;
   var shift=shiftLabel(used,li);
   var badgeCl=shift==='Sch3'?'ber':shift==='Sch2'?'bwn':'bok';
-  var schName=schRef==='sch2'?'sch2':'sch';
-  var h='<div style="margin-bottom:'+(compact?'7':'8')+'px" onmouseenter="showBarTip('+li+','+w+','+schName+',event)" onmouseleave="hideBarTip()" style="cursor:default">';
+  var schName=(schObj===sch2)?'sch2':'sch';
+  // comenzi mutate înainte în această săptămână
+  var movedHere=schObj?schObj.al.filter(function(a){return a.li===li&&a.w===w&&a.moved;}):[];
+  var movedCnt=movedHere.length;
+  var h='<div style="margin-bottom:'+(compact?'7':'8')+'px" onmouseenter="showBarTip('+li+','+w+','+schName+',event)" onmouseleave="hideBarTip()">';
   if(!compact){
     var l=lines[li];
     var satTag=l.sat?'<span style="font-size:9px;color:var(--teal);margin-left:4px">[Sâm]</span>':'';
     h+='<div style="display:flex;justify-content:space-between;font-size:11px;margin-bottom:3px">';
     h+='<span style="font-weight:600;color:var(--text)">'+l.code+' '+satTag+'</span>';
-    h+='<span style="color:var(--text2)">'+pct+'% · '+used.toFixed(1)+'h · ops/sch:'+l.ops+' <span class="bdg '+badgeCl+'">'+shift+'</span></span>';
+    h+='<span style="display:flex;align-items:center;gap:5px;color:var(--text2)">'+pct+'% · '+used.toFixed(1)+'h · ops/sch:'+l.ops+' <span class="bdg '+badgeCl+'">'+shift+'</span>'+(movedCnt>0?'<span class="bdg bmv" title="'+movedCnt+' comenzi mutate din săpt. viitoare">↑'+movedCnt+'</span>':'')+'</span>';
     h+='</div>';
   } else {
     var l=lines[li];
     h+='<div style="display:flex;justify-content:space-between;font-size:10px;margin-bottom:2px">';
     h+='<span style="font-weight:600;color:var(--text)">'+l.code+'</span>';
-    h+='<span style="color:var(--text2)">'+pct+'% <span class="bdg '+badgeCl+'">'+shift+'</span></span>';
+    h+='<span style="display:flex;align-items:center;gap:4px;color:var(--text2)">'+pct+'% <span class="bdg '+badgeCl+'">'+shift+'</span>'+(movedCnt>0?'<span class="bdg bmv">↑'+movedCnt+'</span>':'')+'</span>';
     h+='</div>';
   }
   h+='<div class="bar-tr" style="height:'+(compact?'14':'20')+'px">';
   if(p1>0) h+='<div style="position:absolute;left:0;top:0;height:100%;width:'+p1+'%;background:#185FA5"></div>';
   if(p2>0) h+='<div style="position:absolute;left:'+p1+'%;top:0;height:100%;width:'+p2+'%;background:#854F0B"></div>';
   if(p3>0) h+='<div style="position:absolute;left:'+(p1+p2)+'%;top:0;height:100%;width:'+p3+'%;background:#7A1A1A"></div>';
+  if(movedCnt>0){
+    // bandă violet pe bara care arată cantitatea mutată
+    var movedH=movedHere.reduce(function(s,a){return s+a.hrs;},0);
+    var mp=Math.min(Math.round(movedH/cap*100),100);
+    if(mp>0) h+='<div style="position:absolute;right:0;top:0;height:100%;width:'+mp+'%;background:rgba(155,127,255,0.35);border-left:2px solid var(--purple)"></div>';
+  }
   h+='</div></div>';
   return h;
 }
@@ -599,7 +605,8 @@ function showBarTip(li, w, schRef, e){
   for(var i=0;i<show.length;i++){
     var a=show[i];
     totalQty+=a.qty; totalH+=a.hrs;
-    rows+='<div class="tip-row"><span>'+items[a.ii].code+'</span><span>'+a.qty+' buc · '+a.hrs.toFixed(1)+'h</span></div>';
+    var movedTag=a.moved?'<span style="color:var(--purple);font-size:9px;margin-left:3px" title="Mutat din W'+String(a.origW+1).padStart(2,'0')+'">↑W'+String(a.origW+1).padStart(2,'0')+'</span>':'';
+    rows+='<div class="tip-row"><span>'+items[a.ii].code+movedTag+'</span><span>'+a.qty+' buc · '+a.hrs.toFixed(1)+'h</span></div>';
   }
   if(al.length>10) rows+='<div style="color:var(--text3);font-size:10px;padding-top:2px">+ '+(al.length-10)+' altele</div>';
   body.innerHTML=rows;
@@ -631,7 +638,7 @@ function renderLinesChart(){
     if(!l.active) continue;
     var used=ll[li][w], cap=getLineCap(li);
     if(cap<=0) continue;
-    out+=buildBarHtml(li,w,used,cap,'sch',false);
+    out+=buildBarHtml(li,w,used,cap,sch,false);
   }
   var el=document.getElementById('lchrt'); if(el) el.innerHTML=out;
 }
@@ -649,21 +656,55 @@ function renderIssues(){
     }
   }
   issues.sort(function(a,b){return b.v-a.v;});
+
+  // comenzi mutate înainte: grupate pe (linie, săpt. destinație)
+  var movedMap={};
+  sch.al.forEach(function(a){
+    if(!a.moved) return;
+    var key=a.li+'_'+a.w;
+    if(!movedMap[key]) movedMap[key]={li:a.li,w:a.w,cnt:0,qty:0};
+    movedMap[key].cnt++; movedMap[key].qty+=a.qty;
+  });
+  var movedList=Object.values(movedMap).sort(function(a,b){return b.cnt-a.cnt;});
+
   var el=document.getElementById('issues');
   if(!el) return;
-  if(!issues.length){el.innerHTML='<div style="color:var(--green);font-size:12px;padding:6px 0">✓ Plan optimizat — nicio problemă!</div>';return;}
   var out='';
-  var show=issues.slice(0,8);
-  for(var i=0;i<show.length;i++){
-    var iss=show[i];
-    out+='<div style="display:flex;align-items:center;gap:8px;padding:5px 0;border-bottom:1px solid var(--border);font-size:11px">';
-    out+='<span class="bdg '+(iss.t==='over'?'ber':'bs3')+'">'+(iss.t==='over'?'Supraîncărcat':'Sch3')+'</span>';
-    out+='<span style="color:var(--text2)">'+lines[iss.li].code+'</span>';
-    out+='<span style="color:var(--text3)">W'+String(iss.w+1).padStart(2,'0')+'</span>';
-    out+='<span style="margin-left:auto;font-family:monospace;color:'+(iss.t==='over'?'var(--red)':'var(--amber)')+'">'+iss.v+(iss.t==='over'?'%':' ore')+'</span>';
-    out+='</div>';
+
+  if(movedList.length>0){
+    out+='<div style="font-size:9px;font-weight:700;color:var(--purple);text-transform:uppercase;letter-spacing:.5px;padding:6px 0 3px">↑ Comenzi trase înainte</div>';
+    var showM=movedList.slice(0,5);
+    for(var i=0;i<showM.length;i++){
+      var m=showM[i];
+      out+='<div style="display:flex;align-items:center;gap:8px;padding:4px 0;border-bottom:1px solid var(--border);font-size:11px">';
+      out+='<span class="bdg bmv">↑ Mutat</span>';
+      out+='<span style="color:var(--text2)">'+lines[m.li].code+'</span>';
+      out+='<span style="color:var(--text3)">→ W'+String(m.w+1).padStart(2,'0')+'</span>';
+      out+='<span style="margin-left:auto;font-family:monospace;color:var(--purple)">'+m.cnt+' cmd · '+m.qty+' buc</span>';
+      out+='</div>';
+    }
+    if(movedList.length>5) out+='<div style="color:var(--text3);font-size:10px;padding:3px 0">+ '+(movedList.length-5)+' altele...</div>';
+    out+='<div style="height:6px"></div>';
   }
-  if(issues.length>8) out+='<div style="color:var(--text3);font-size:10px;padding:4px 0">+ '+(issues.length-8)+' altele...</div>';
+
+  if(!issues.length && !movedList.length){
+    el.innerHTML='<div style="color:var(--green);font-size:12px;padding:6px 0">✓ Plan optimizat — nicio problemă!</div>';
+    return;
+  }
+  if(issues.length>0){
+    out+='<div style="font-size:9px;font-weight:700;color:var(--red);text-transform:uppercase;letter-spacing:.5px;padding:3px 0">⚠ Probleme capacitate</div>';
+    var show=issues.slice(0,6);
+    for(var i=0;i<show.length;i++){
+      var iss=show[i];
+      out+='<div style="display:flex;align-items:center;gap:8px;padding:4px 0;border-bottom:1px solid var(--border);font-size:11px">';
+      out+='<span class="bdg '+(iss.t==='over'?'ber':'bs3')+'">'+(iss.t==='over'?'Supraîncărcat':'Sch3')+'</span>';
+      out+='<span style="color:var(--text2)">'+lines[iss.li].code+'</span>';
+      out+='<span style="color:var(--text3)">W'+String(iss.w+1).padStart(2,'0')+'</span>';
+      out+='<span style="margin-left:auto;font-family:monospace;color:'+(iss.t==='over'?'var(--red)':'var(--amber)')+'">'+iss.v+(iss.t==='over'?'%':' ore')+'</span>';
+      out+='</div>';
+    }
+    if(issues.length>6) out+='<div style="color:var(--text3);font-size:10px;padding:3px 0">+ '+(issues.length-6)+' altele...</div>';
+  }
   el.innerHTML=out;
 }
 
@@ -1085,12 +1126,10 @@ function runOptimizerLogic3W(){
     if(ll[a.li][a.w]<=getLineCapTwoShift(a.li)){a.shift=shiftLabel(ll[a.li][a.w],a.li);continue;}
     var moved=false;
     for(var dw=1;dw<=win&&!moved;dw++){
-      for(var s=0;s<2&&!moved;s++){
-        var nw=a.w+[-1,1][s]*dw;
-        if(nw<0||nw>=W3) continue;
-        if(ll[a.li][nw]+a.hrs<=getLineCapTwoShift(a.li)){
-          ll[a.li][a.w]-=a.hrs; ll[a.li][nw]+=a.hrs; a.w=nw; a.moved=true; moved=true;
-        }
+      var nw=a.w-dw; // doar înapoi
+      if(nw<0) continue;
+      if(ll[a.li][nw]+a.hrs<=getLineCapTwoShift(a.li)){
+        ll[a.li][a.w]-=a.hrs; ll[a.li][nw]+=a.hrs; a.w=nw; a.moved=true; moved=true;
       }
     }
     a.shift=shiftLabel(ll[a.li][a.w],a.li);
@@ -1142,7 +1181,7 @@ function renderWeekCol(w){
     if(!l.active) continue;
     var used=ll[li][w], cap=getLineCap(li);
     if(cap<=0) continue;
-    out+=buildBarHtml(li,w,used,cap,'sch2',true);
+    out+=buildBarHtml(li,w,used,cap,sch2,true);
   }
   return out||'<div style="color:var(--text3);font-size:11px">Nicio linie activă</div>';
 }
