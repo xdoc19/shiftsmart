@@ -898,6 +898,25 @@ function renderItemsTable(){
 }
 function setDefLine(itemIdx,lineId){
   items[itemIdx].defLine=lineId;
+  // realocă tot demandul itemului pe noua linie default în planificare curentă
+  if(lineId>=0 && items[itemIdx].rr[lineId]>0){
+    [sch,sch2].forEach(function(s){
+      if(!s) return;
+      for(var i=0;i<s.al.length;i++){
+        var a=s.al[i];
+        if(a.ii!==itemIdx) continue;
+        var newRr=items[itemIdx].rr[lineId];
+        var newHrs=a.qty/newRr;
+        s.ll[a.li][a.w]-=a.hrs;
+        s.ll[lineId][a.w]+=newHrs;
+        a.li=lineId; a.rr=newRr; a.hrs=newHrs;
+        a.shift=shiftLabel(s.ll[lineId][a.w],lineId);
+        a.over=s.ll[lineId][a.w]>getLineCap(lineId);
+      }
+    });
+    if(sch){updateKPIs();renderDash();renderCap();}
+    if(sch2){updateKPIs2();renderDash2();}
+  }
   renderItemsTable();
 }
 
