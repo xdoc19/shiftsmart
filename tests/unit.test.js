@@ -189,25 +189,22 @@ section('4. buildBase — fallback corect când defLine are rr=0');
   });
 }
 
-// ── SUITE 5: Optimizer Step 1 — mutare pe linie alternativă ───────────────
-section('5. Optimizer Step 1 — mutare pe linie alternativă când supraîncărcat');
+// ── SUITE 5: Optimizer — producția rămâne pe defLine ─────────────────────
+section('5. Optimizer — producția rămâne întotdeauna pe defLine');
 
 {
   const ctx = makeCtx();
-  // cap2 L01 = (4*2+2)*8 = 80h, punem 200h pe ea
   ctx.lines = [
     { id:0, code:'L01', active:true, maxSch:3, ops:2, sat:false },
     { id:1, code:'L02', active:true, maxSch:3, ops:2, sat:false }
   ];
+  // ITEM-A are rr pe ambele linii, defLine=0 → trebuie să rămână pe L01
   ctx.items = [
     { id:0, code:'ITEM-A', rr:{0:50, 1:40}, defLine:0 }
   ];
-  // 10000 buc / 50 rr = 200h > cap2 (80h) → ar trebui mutat pe L02 dacă are loc
-  ctx.demand = [[10000]];
+  ctx.demand = [[500]];
   ctx.WEEKS = 1;
   ctx.cfg = { s1:8, s2:8, s3:8, mth:3, fri:2, win:2 };
-
-  // Rulăm optimizer logic fără render DOM
   ctx.updateKPIs = () => {};
   ctx.renderDash = () => {};
   ctx.renderCap = () => {};
@@ -216,10 +213,15 @@ section('5. Optimizer Step 1 — mutare pe linie alternativă când supraîncăr
   ctx.renderOpsGap = () => {};
 
   ctx.runOptimizerLogic();
-  const al = ctx.sch.al;
 
-  test('Optimizatorul nu alocă pe linii cu rr=0', () => {
-    for (const a of al) {
+  test('Optimizer nu mută pe L02 chiar dacă L01 e supraîncărcat', () => {
+    for (const a of ctx.sch.al) {
+      assert.strictEqual(a.li, 0, `ITEM-A a fost mutat pe linia ${a.li} în loc să rămână pe defLine=0`);
+    }
+  });
+
+  test('Optimizer nu alocă pe linii cu rr=0', () => {
+    for (const a of ctx.sch.al) {
       const rrVal = ctx.items[a.ii].rr[a.li];
       assert.ok(rrVal > 0, `Alocare cu rr=0 pe linia ${a.li}`);
     }
