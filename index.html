@@ -1147,17 +1147,32 @@ function ganttDrop(e,toLi,toW){
     dragSrc=null; return;
   }
 
-  // perform move
+  // check if same item exists on target line+week -> MERGE
+  var existIdx=-1;
+  for(var ai=0;ai<sch.al.length;ai++){
+    if(ai!==alIdx&&sch.al[ai].ii===ii&&sch.al[ai].li===toLi&&sch.al[ai].w===toW){
+      existIdx=ai; break;
+    }
+  }
   sch.ll[fromLi][fromW]-=a.hrs;
   var newHrs=a.qty/newRR;
-  sch.ll[toLi][toW]+=newHrs;
-  a.li=toLi; a.w=toW; a.rr=newRR; a.hrs=newHrs; a.moved=true;
-  a.shift=shiftLabel(sch.ll[toLi][toW],toLi);
-  a.over=sch.ll[toLi][toW]>getLineCap(toLi);
-
+  if(existIdx>=0){
+    var ex=sch.al[existIdx];
+    ex.qty+=a.qty; ex.hrs+=newHrs; ex.moved=true;
+    sch.ll[toLi][toW]+=newHrs;
+    ex.shift=shiftLabel(sch.ll[toLi][toW],toLi);
+    ex.over=sch.ll[toLi][toW]>getLineCap(toLi);
+    sch.al.splice(alIdx,1);
+    showToast('✓ '+items[ii].code+' cumulat: '+ex.qty.toLocaleString()+' buc pe '+lines[toLi].code+' W'+String(toW+1).padStart(2,'0'));
+  } else {
+    sch.ll[toLi][toW]+=newHrs;
+    a.li=toLi; a.w=toW; a.rr=newRR; a.hrs=newHrs; a.moved=true;
+    a.shift=shiftLabel(sch.ll[toLi][toW],toLi);
+    a.over=sch.ll[toLi][toW]>getLineCap(toLi);
+    showToast('✓ '+items[ii].code+' mutat pe '+lines[toLi].code+' W'+String(toW+1).padStart(2,'0'));
+  }
   updateKPIs();
   renderGantt();
-  showToast('✓ '+items[ii].code+' mutat pe '+lines[toLi].code+' W'+String(toW+1).padStart(2,'0'));
   dragSrc=null;
 }
 
